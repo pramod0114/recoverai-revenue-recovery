@@ -4,20 +4,73 @@ Built for **Razorpay Buildathon Track 03: "AI Revenue Recovery — Find revenue 
 
 ---
 
-## 1. Executive Summary & Core Capabilities
+## 1. Executive Summary & Overview
 
-RecoverAI is an autonomous financial intelligence platform that detects at-risk payment failures, diagnoses underlying technical or customer friction root causes using ensemble machine learning, calculates recovery probabilities, executes bounded recovery actions within policy guardrails, and maintains a cryptographically verified audit ledger.
+**RecoverAI** is an end-to-end autonomous revenue recovery platform designed to detect failed payment transactions, diagnose underlying technical, banking, and customer friction root causes, execute bounded recovery workflows within strict guardrails, and generate executive financial reports.
 
-### Key Pillars:
-1. **Real-Time Webhook Engine**: High-throughput ingestion of Razorpay payment events with timing-safe HMAC-SHA256 signature verification and idempotency locks.
-2. **Predictive ML Intelligence**: 38-feature ensemble model predicting recovery likelihood, revenue at risk, and actionable root cause classification.
-3. **Autonomous Agent & Policy Guardrails**: Bounded execution state machine enforcing retry ceilings, transaction amount caps, and human desk escalation.
-4. **Zero-Trust Security & Audit Trail**: Comprehensive security headers, token bucket rate limiting, sensitive credential masking, and tamper-evident audit logging.
-5. **Interactive Operations Dashboard**: High-contrast, responsive dashboard with role-based access control (ADMIN / ANALYST), live Razorpay webhook simulator, and interactive recovery case workbench.
+RecoverAI pairs a **38-feature Machine Learning prediction model** and an **Autonomous Agent State Machine** with direct **Razorpay Gateway & Webhook integration** to capture lost revenue in real time.
 
 ---
 
-## 2. System Architecture
+## 2. Complete Feature Matrix
+
+### 🚀 Core Platform Features
+
+#### 1. Real-Time Razorpay Ingestion & Webhook Engine
+- **HMAC-SHA256 Cryptographic Verification**: Timing-safe verification (`crypto.timingSafeEqual`) on all incoming webhook payloads using `RAZORPAY_WEBHOOK_SECRET`.
+- **Idempotency & Deduplication**: Ingests events by `event_id` and SHA-256 payload hash to prevent double dunning or duplicated retries across network re-transmissions.
+- **Full Event Lifecycle Support**: Handles `payment.failed`, `payment.captured`, `payment_link.paid`, `order.paid`, and `refund.processed`.
+- **Interactive Webhook Simulator**: Built-in simulator to test synthetic payment events directly from the UI with real signature calculation and live ledger tracking.
+
+#### 2. Machine Learning Predictive Intelligence
+- **38-Feature Preprocessing Pipeline**: Evaluates transaction velocity, gateway error taxonomy, customer tier, historical payment health score, time-of-day dynamics, bank downtime history, and payment method behavior.
+- **Recovery Likelihood Probability**: Quantifies win-back probability ($0.00$ to $1.00$) for every failed payment attempt.
+- **Automated Root Cause Diagnostics**: Classifies errors into technical outages (e.g., UPI timeouts, gateway 5xx), customer friction (e.g., card expiry, insufficient funds), or security flags (e.g., 3DS failure).
+- **Explainability Factors**: Delivers explainable ML confidence scores and reasoning factors to analysts.
+
+#### 3. Bounded Recovery Agent & Policy Guardrails
+- **Autonomous Multi-Channel Execution**:
+  - **Smart API Retries**: Exponential backoff scheduling timed with bank clearing windows.
+  - **WhatsApp Interactive Links**: Automated rich checkout links with customized win-back messaging.
+  - **Automated SMS & Email**: Direct fallback links for mobile customer recovery.
+- **Bounded State Machine**: Strict state lifecycle (`DETECTED` ➔ `ANALYZED` ➔ `DISPATCHED` ➔ `RECOVERED` / `FAILED` / `HUMAN_ESCALATION`).
+- **Policy Engine Rules**:
+  - Max retry ceilings per payment method.
+  - Cooldown periods between attempts.
+  - Discount caps (configurable per tier).
+  - High-value transaction escalation threshold (>₹50,000 auto-routed to human analysts).
+
+#### 4. Designed Excel & Multi-Format Reporting Engine
+- **Designed Microsoft Excel Export (`.xls`)**:
+  - Custom branded header banner with company metadata and export timestamps.
+  - Executive KPI summary cards with styled background fills and metric callouts.
+  - Color-coded status badges (🟢 *Success/Recovered*, 🔴 *Failed*, 🔵 *In-Progress*, 🟠 *Scheduled*).
+  - High-contrast navy table headers (`#2563EB`) and alternating row striping (`#F9FAFB`).
+  - Full Unicode / UTF-8 BOM encoding for INR currency (`₹`) symbols.
+- **Standard CSV Export (`.csv`)**: Raw tabular format with UTF-8 BOM encoding for Google Sheets, Numbers, or Excel.
+- **JSON Telemetry Export (`.json`)**: Formatted data tree containing raw ML inference parameters, audit trails, and timestamps.
+- **Executive PDF / Print View**: Formatted executive report with badges, KPI cards, and printable layout.
+
+#### 5. Operations Workbench & Analytics Dashboards
+- **Revenue Recovery Intelligence Dashboard**: Live KPI metrics (Total Recovered, Recovery Rate %, At-Risk Failed Volume, Active Interventions), recovery trend charts, and interactive funnel visualizations.
+- **Revenue Analytics Page**: Method win-back yield (UPI, Cards, Netbanking, Wallets), customer tier segmentation (Enterprise, Growth, Standard, Starter), and time-range filtering (`7d`, `30d`, `90d`, `YTD`).
+- **Payments Ledger**: Searchable, filterable ledger of payment attempts, failure error codes, gateway telemetries, and AI diagnostic modals.
+- **Recovery Cases Workbench**: State machine cases, root cause badges, manual intervention triggers, and recovery timeline modals.
+- **Active Interventions Page**: Tracking dispatched WhatsApp messages, SMS, and scheduled retries.
+- **Customer Portfolios & Health Scores**: Risk scoring, customer tiers, lifetime spend, and payment failure history.
+- **AI Autonomous Agent Live Stream**: Real-time terminal feed of agent inferences, policy checks, and confidence evaluations.
+- **Compliance & Audit Ledger**: Tamper-evident ledger recording every system action, user override, and policy transition.
+- **Admin Configuration & Recovery Policies**: Configurable retry limits, cooldown hours, discount policies, and user management with RBAC.
+
+#### 6. Zero-Trust Security & Access Control
+- **Role-Based Access Control (RBAC)**: Distinct permissions for `ADMIN` (full control, manual action execution, policy editing) and `ANALYST` (operations workbench, read-only analytics).
+- **JWT Authentication & Password Hashing**: Secure token-based session handling with Bcrypt password hashing.
+- **Rate Limiting & Security Headers**: Token bucket IP rate limiting, `nosniff`, `SAMEORIGIN`, and CSP headers.
+- **Sensitive Data Masking**: Automatic masking of customer PII in logs and telemetries.
+
+---
+
+## 3. System Architecture
 
 ```
                                   [Razorpay Payment Gateway]
@@ -36,7 +89,8 @@ RecoverAI is an autonomous financial intelligence platform that detects at-risk 
                       ├──► [ML Predictor (38 Features)] ───► Diagnostic & Probabilities
                       ├──► [PolicyEngine Guardrails]     ───► Max Cap, Retry Limits, Human Escalation
                       ├──► [RecoveryExecutor (Sandbox)]  ───► Bounded Retries & Smart Links
-                      └──► [AuditService Ledger]         ───► Immutable State Transition Log
+                      ├──► [AuditService Ledger]         ───► Immutable State Transition Log
+                      └──► [Excel/CSV Export Engine]     ───► Designed .xls, .csv, .json, PDF
                       │
                       ▼
          ┌────────────────────────┐
@@ -46,12 +100,11 @@ RecoverAI is an autonomous financial intelligence platform that detects at-risk 
 
 ---
 
-## 3. Razorpay Test-Mode Integration & Setup
+## 4. Environment Configuration
 
-### 3.1 Environment Configuration
-RecoverAI isolates gateway keys in the backend. Secrets are **never** exposed to the frontend browser.
+The backend isolates all API keys and secrets. Secrets are **never** exposed to the frontend client.
 
-Configure `.env` in the project root:
+Example `.env` configuration:
 
 ```env
 # Server Port (Hardcoded to 3000 in sandbox)
@@ -66,55 +119,29 @@ RAZORPAY_WEBHOOK_SECRET=whsec_recoverai_test_secret_2026_x99
 SIMULATION_MODE=true
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX_REQUESTS=120
+JWT_SECRET=recoverai_jwt_super_secret_key_2026
 ```
 
-### 3.2 Gateway Endpoints Implemented
+---
 
-| Endpoint | Method | Purpose | Security / Requirements |
+## 5. API Endpoints Reference
+
+| Endpoint | Method | Purpose | Access Control |
 |---|---|---|---|
-| `/api/webhooks/razorpay` | `POST` | Ingests real & test Razorpay webhook events | `x-razorpay-signature` (HMAC SHA-256) |
-| `/api/webhooks/razorpay/simulate` | `POST` | Dispatches simulated payment events | Accessible in `SIMULATION_MODE` |
-| `/api/webhooks/razorpay/events` | `GET` | Retrieves recent webhook event ledger | Requires JWT Authentication |
-| `/api/webhooks/razorpay/config` | `GET` | Webhook verification status & endpoint URL | Requires JWT Authentication |
-| `/api/recovery/cases` | `GET` | Lists all active/recovered recovery cases | RBAC (ADMIN / ANALYST) |
-| `/api/recovery/cases/:id/execute` | `POST` | Manually triggers or overrides recovery action | RBAC (ADMIN Only) |
-| `/api/audit/logs` | `GET` | Immutable timeline of transitions & decisions | RBAC (Read-Only for ANALYST) |
-
----
-
-## 4. Webhook Security & Ingestion Pipeline
-
-### 4.1 Cryptographic Signature Verification
-Razorpay webhooks pass a signature header `x-razorpay-signature`. The backend computes:
-
-$$\text{Expected Signature} = \text{HMAC-SHA256}(\text{Raw Request Body}, \text{RAZORPAY\_WEBHOOK\_SECRET})$$
-
-Verification utilizes `crypto.timingSafeEqual` over pre-allocated byte buffers to prevent timing side-channel attacks.
-
-### 4.2 Idempotency & Deduplication
-To guarantee at-most-once processing across network retries:
-- Every event is indexed by its gateway `event_id`.
-- A deterministic `payload_hash` ($\text{SHA256}(\text{rawBody})$) guards against header variations.
-- Duplicate deliveries immediately return HTTP `200 OK` with status `DUPLICATE_SKIPPED` without re-triggering dunning or ML jobs.
-
-### 4.3 Supported Razorpay Event Lifecycle
-
-| Gateway Event | RecoverAI Automated Action |
-|---|---|
-| `payment.failed` | Analyzes failure reason, computes ML probability, checks policy caps, initiates automated smart recovery or human escalation. |
-| `payment.captured` | Verifies recovery amount, marks case as `RECOVERED`, halts all outstanding dunning reminders or retries. |
-| `payment_link.paid` | Confirms payment link settlement, closes active recovery ticket, records settled audit log. |
-| `order.paid` | Synchronizes order reconciliation state with customer transaction ledger. |
-
----
-
-## 5. Security Hardening & Guardrails
-
-1. **Security Headers**: Injected on all API responses (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Strict-Transport-Security`, `Content-Security-Policy`).
-2. **Rate Limiting**: Sliding Token Bucket algorithm restricting client IP requests (default 120 req/min).
-3. **Data Masking & Redaction**: Customer PII (phone numbers, emails) and secrets are masked in server logs (`j***@example.com`, `+91 98*** **210`).
-4. **High-Value Transaction Guardrail**: Any payment exceeding ₹50,000 (configurable) is automatically barred from autonomous debit retries and redirected to `HUMAN_ESCALATION` for human desk approval.
-5. **Cooldown Intervals**: Strict 60-second cooldown between consecutive automated retries per case.
+| `/api/webhooks/razorpay` | `POST` | Ingests real Razorpay webhook events | `x-razorpay-signature` |
+| `/api/webhooks/razorpay/simulate` | `POST` | Dispatches simulated payment events | Public / Simulation |
+| `/api/webhooks/razorpay/events` | `GET` | Retrieves recent webhook event ledger | JWT Required |
+| `/api/webhooks/razorpay/config` | `GET` | Webhook verification status & endpoint URL | JWT Required |
+| `/api/dashboard/overview` | `GET` | Aggregated recovery KPIs and trends | JWT Required |
+| `/api/payments` | `GET` | Filtered list of payment transactions | JWT Required |
+| `/api/recovery/cases` | `GET` | Lists all active and recovered recovery cases | JWT Required |
+| `/api/recovery/cases/:id/execute`| `POST` | Manually triggers recovery intervention | `ADMIN` Role Only |
+| `/api/interventions` | `GET` | Lists all dispatched multi-channel actions | JWT Required |
+| `/api/customers` | `GET` | Customer profiles, risk scores, and lifetime value | JWT Required |
+| `/api/audit/logs` | `GET` | Immutable compliance timeline of decisions | JWT Required |
+| `/api/admin/policies` | `GET`/`POST`| List or create recovery policy guardrails | `ADMIN` Role Only |
+| `/api/admin/users` | `GET`/`POST`| User management and role assignment | `ADMIN` Role Only |
+| `/api/health` | `GET` | System and database health telemetry | Public |
 
 ---
 
@@ -156,12 +183,10 @@ Visit **`http://localhost:3000`** in your browser.
 
 *(1-Click demo authentication buttons are available on the Login screen).*
 
-### 6.4 Using the Webhook Simulator in the UI
-1. Log in to the application and navigate to **System Health** (`/health`).
-2. Scroll to the **Razorpay Webhook Simulator & Diagnostics** panel.
-3. Select an event type (`payment.failed`, `payment.captured`, `payment_link.paid`, etc.), adjust the amount and failure reason.
-4. Click **Dispatch Test Event** to fire the payload through the real signature verification and recovery pipeline.
-5. Watch the live **Webhook Event Ledger** update in real-time with event IDs, payload hashes, and recovery case links.
+### 6.4 Exporting Reports in Designed Excel & CSV
+1. Navigate to **Executive & Operational Reports** (`/reports`) or **Revenue Analytics** (`/analytics`).
+2. Select **Designed Excel (.xls)**, **CSV (.csv)**, **JSON (.json)**, or **Print / PDF**.
+3. Click **Export Report** to immediately download the styled spreadsheet with color-coded status badges, KPI cards, and formatted tables.
 
 ---
 

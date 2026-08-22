@@ -11,7 +11,13 @@ import {
   Calendar,
   Sparkles,
   ShieldCheck,
-  Zap
+  Zap,
+  CheckCircle2,
+  FileSpreadsheet,
+  FileCode,
+  Printer,
+  ChevronDown,
+  X
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -28,12 +34,15 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import { exportToCsv, exportToJson, exportToPrintableReport } from '../utils/exportUtils';
 
 export const RevenueAnalyticsPage: React.FC = () => {
   const [kpis, setKpis] = useState<any>(null);
   const [trend, setTrend] = useState<any[]>([]);
   const [failureBreakdown, setFailureBreakdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exportSuccessMsg, setExportSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -76,8 +85,91 @@ export const RevenueAnalyticsPage: React.FC = () => {
     { tier: 'Starter (<₹5k)', recovered: 80000, percentage: 6.8, color: '#F97316' }
   ];
 
+  const handleExport = (format: 'csv' | 'json' | 'pdf') => {
+    setShowExportMenu(false);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filename = `recoverai_revenue_analytics_${dateStr}`;
+
+    if (format === 'csv') {
+      const headers = ['Category', 'Metric / Dimension', 'Value', 'Context'];
+      const rows: (string | number)[][] = [
+        ['KPI Summary', 'Total Processed Volume', kpis?.totalProcessedVolume || 14850000, 'INR'],
+        ['KPI Summary', 'Total Recovered Revenue', kpis?.recoveredRevenue || 1172000, 'INR (+63.5% recovery rate)'],
+        ['KPI Summary', 'Average Win-Back Time', '28.4 mins', 'vs 48 hrs for manual support'],
+        ['KPI Summary', 'Agent ROI Multiplier', '18.2x', 'Zero added support overhead'],
+        ['Method Yield', '---', '---', '---'],
+      ];
+
+      paymentMethodData.forEach((p) => {
+        rows.push(['Payment Method Yield', p.method, `Recovered: ₹${p.recovered} / At Risk: ₹${p.atRisk}`, `Recovery Rate: ${p.rate}%`]);
+      });
+
+      rows.push(['Customer Tiers', '---', '---', '---']);
+      customerTierData.forEach((c) => {
+        rows.push(['Customer Tier Breakdown', c.tier, `₹${c.recovered}`, `Share: ${c.percentage}%`]);
+      });
+
+      exportToCsv(filename, headers, rows);
+      setExportSuccessMsg('Revenue analytics exported to CSV successfully!');
+    } else if (format === 'json') {
+      const exportPayload = {
+        title: 'Revenue Analytics & Recovery Yield Report',
+        generatedAt: new Date().toISOString(),
+        kpis: {
+          totalProcessedVolume: kpis?.totalProcessedVolume || 14850000,
+          recoveredRevenue: kpis?.recoveredRevenue || 1172000,
+          averageWinBackTime: '28.4 mins',
+          agentRoiMultiplier: '18.2x'
+        },
+        paymentMethodYield: paymentMethodData,
+        customerTierSegmentation: customerTierData,
+        revenueTrend: trend,
+        failureBreakdown: failureBreakdown
+      };
+      exportToJson(filename, exportPayload);
+      setExportSuccessMsg('Revenue analytics exported to JSON successfully!');
+    } else if (format === 'pdf') {
+      const headers = ['Metric / Dimension', 'Recovered Volume', 'Rate / Share'];
+      const rows = [
+        ...paymentMethodData.map(p => [p.method, `₹${(p.recovered / 100000).toFixed(2)}L`, `${p.rate}% Win-Back`]),
+        ...customerTierData.map(c => [c.tier, `₹${(c.recovered / 100000).toFixed(2)}L`, `${c.percentage}% Share`])
+      ];
+
+      exportToPrintableReport({
+        title: 'Revenue Analytics & Recovery Yield Executive Report',
+        subtitle: 'Financial telemetry on autonomous win-back velocity and customer cohort retention',
+        kpis: [
+          { label: 'Total Processed', value: formatLakhs(kpis?.totalProcessedVolume || 14850000) },
+          { label: 'Recovered Volume', value: formatLakhs(kpis?.recoveredRevenue || 1172000) },
+          { label: 'Win-Back Time', value: '28.4 mins' },
+          { label: 'Agent ROI', value: '18.2x' },
+        ],
+        headers,
+        rows
+      });
+      setExportSuccessMsg('Executive report generated and opened for print/PDF export!');
+    }
+
+    setTimeout(() => {
+      setExportSuccessMsg(null);
+    }, 4500);
+  };
+
   return (
     <div className="space-y-8">
+      {/* Export Success Toast */}
+      {exportSuccessMsg && (
+        <div className="p-3.5 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl flex items-center justify-between text-xs font-semibold text-[#027A48] shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#12B76A]" />
+            <span>{exportSuccessMsg}</span>
+          </div>
+          <button onClick={() => setExportSuccessMsg(null)} className="p-1 hover:bg-[#D1FADF] rounded">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -89,14 +181,55 @@ export const RevenueAnalyticsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#EAECF0] hover:bg-[#F9FAFB] text-[#344054] rounded-lg text-xs font-semibold shadow-xs transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export Report</span>
-          </button>
+        <div className="flex items-center gap-3 relative">
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center gap-2 px-3.5 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Report</span>
+              <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-[#E4E7EC] p-1.5 z-50 animate-in fade-in zoom-in-95">
+                <div className="text-[11px] font-bold text-[#98A2B3] px-2.5 py-1 uppercase tracking-wider">
+                  Select Format
+                </div>
+                <button
+                  onClick={() => handleExport('csv')}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-[#344054] hover:bg-[#F2F4F7] rounded-lg text-left transition-colors"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-[#12B76A]" />
+                  <div>
+                    <div className="font-semibold text-[#101828]">Export as CSV</div>
+                    <div className="text-[10px] text-[#667085]">Excel & Sheets compatible</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleExport('json')}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-[#344054] hover:bg-[#F2F4F7] rounded-lg text-left transition-colors"
+                >
+                  <FileCode className="w-4 h-4 text-[#7A5AF8]" />
+                  <div>
+                    <div className="font-semibold text-[#101828]">Export as JSON</div>
+                    <div className="text-[10px] text-[#667085]">Full data & raw telemetry</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleExport('pdf')}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-[#344054] hover:bg-[#F2F4F7] rounded-lg text-left transition-colors"
+                >
+                  <Printer className="w-4 h-4 text-[#2563EB]" />
+                  <div>
+                    <div className="font-semibold text-[#101828]">Executive PDF / Print</div>
+                    <div className="text-[10px] text-[#667085]">Formatted printable summary</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
