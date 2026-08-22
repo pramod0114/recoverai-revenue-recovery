@@ -77,12 +77,34 @@ export const api = {
   },
   getCustomerById: (id: string) => request<any>(`/customers/${id}`),
 
-  // Recovery
+  // Recovery Agent & Bounded Workflows
   getRecoveryCases: (params?: Record<string, string | number>) => {
     const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
     return request<any[]>(`/recovery/cases${query}`);
   },
   getRecoveryCaseById: (id: string) => request<any>(`/recovery/cases/${id}`),
+  analyzeRecovery: (payload: { transaction_id?: string; case_id?: string; amount?: number; payment_method?: string; failure_reason?: string; [key: string]: any }) =>
+    request<any>('/recovery/analyze', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  executeRecovery: (payload: { case_id?: string; transaction_id?: string; override_action?: string; idempotency_key?: string; [key: string]: any }) =>
+    request<any>('/recovery/execute', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  verifyRecovery: (payload: { case_id: string; transaction_id?: string }) =>
+    request<any>('/recovery/verify', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  escalateRecovery: (payload: { case_id: string; reason?: string; priority?: string; operator_notes?: string }) =>
+    request<any>('/recovery/escalate', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  getRecoveryCaseAudit: (id: string) => request<any>(`/recovery/cases/${id}/audit`),
+  diagnoseAllRecoveryCases: () => request<any>('/recovery/diagnose-all', { method: 'POST' }),
   triggerRecoveryAction: (id: string, actionData: { actionType: string; channel?: string }) =>
     request<any>(`/recovery/cases/${id}/action`, {
       method: 'POST',

@@ -1,16 +1,27 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { memoryStore } from '../db/connection.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { MLRecoveryPredictor } from '../../ml/inference/predictor.js';
+import { RecoveryAgent } from '../agent/RecoveryAgent.js';
+import { AuditService } from '../agent/AuditService.js';
+import { ControlledRecoveryAction } from '../agent/types.js';
 
 export const recoveryRouter = Router();
+const agent = RecoveryAgent.getInstance();
+const auditService = AuditService.getInstance();
 
+/**
+ * GET /api/recovery/cases
+ * List all recovery cases with filtering, search, pagination
+ */
 recoveryRouter.get('/cases', (req: Request, res: Response) => {
   let list = Array.from(memoryStore.recoveryCases.values());
-  const { status, strategy, search, limit = '25', page = '1' } = req.query;
+  const { status, strategy, search, workflow_state, limit = '25', page = '1' } = req.query;
 
   if (status && status !== 'ALL') {
     list = list.filter((c) => c.status === status);
+  }
+  if (workflow_state && workflow_state !== 'ALL') {
+    list = list.filter((c) => (c as any).workflow_state === workflow_state);
   }
   if (strategy && strategy !== 'ALL') {
     list = list.filter((c) => c.recommended_strategy === strategy);
@@ -47,6 +58,10 @@ recoveryRouter.get('/cases', (req: Request, res: Response) => {
   });
 });
 
+/**
+ * GET /api/recovery/cases/:id
+ * Retrieve full recovery case record with payment and audit trail
+ */
 recoveryRouter.get('/cases/:id', (req: Request, res: Response, next: NextFunction) => {
   const item = memoryStore.recoveryCases.get(req.params.id);
   if (!item) {
@@ -55,125 +70,304 @@ recoveryRouter.get('/cases/:id', (req: Request, res: Response, next: NextFunctio
 
   const actions = Array.from(memoryStore.recoveryActions.values()).filter((a) => a.case_id === item.id);
   const payment = memoryStore.payments.get(item.payment_id);
+  const auditTrail = auditService.getCaseAuditTrail(item.id);
 
   res.json({
     success: true,
     data: {
       ...item,
       payment,
-      actions
+      actions,
+      auditTrail
     }
   });
 });
 
-recoveryRouter.post('/cases/:id/action', (req: Request, res: Response, next: NextFunction) => {
-  const rCase = memoryStore.recoveryCases.get(req.params.id);
-  if (!rCase) {
-    return next(new AppError(`Recovery case not found: ${req.params.id}`, 404, 'NOT_FOUND'));
-  }
+/**
+ * POST /api/recovery/analyze
+ * AI Revenue Recovery Agent analysis & policy evaluation endpoint
+ */
+recoveryRouter.post('/analyze', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const {
+      case_id,
+      transaction_id,
+      amount,
+      payment_method,
+      failure_reason,
+      customer_id,
+      customer_name,
+      customer_email,
+      customer_phone,
+      retry_count,
+      risk_score,
+      recovery_probability,
+      root_cause
+    } = req.body;
 
-  const { actionType = 'DYNAMIC_RETRY', channel = 'WHATSAPP' } = req.body;
+    // Resolve transaction context if only ID is provided
+    let txId = transaction_id;
+    let resolvedAmount = amount;
+    let resolvedMethod = payment_method;
+    let resolvedReason = failure_reason;
+    let resolvedRetry = retry_count ?? 0;
+    let resolvedCustId = customer_id;
+    let resolvedCustName = customer_name;
+    let resolvedCustEmail = customer_email;
+    let resolvedCustPhone = customer_phone;
 
-  // Create action record
-  const actionId = `act_${Date.now()}`;
-  const isRecovered = Math.random() < 0.78;
-
-  const actionRecord = {
-    id: actionId,
-    case_id: rCase.id,
-    action_type: actionType,
-    status: isRecovered ? ('SUCCESS' as const) : ('EXECUTED' as const),
-    trigger_channel: channel,
-    payload_snapshot: { actionType, channel, triggerTime: new Date().toISOString() },
-    result_response: isRecovered ? 'Customer completed payment link successfully' : 'Intervention dispatched via Razorpay webhook link',
-    scheduled_for: new Date().toISOString(),
-    executed_at: new Date().toISOString(),
-    created_at: new Date().toISOString()
-  };
-
-  memoryStore.recoveryActions.set(actionId, actionRecord);
-  rCase.actions_taken_count += 1;
-
-  if (isRecovered) {
-    rCase.status = 'RECOVERED';
-    rCase.recovered_amount = rCase.at_risk_amount;
-    rCase.recovered_at = new Date().toISOString();
-    rCase.closed_at = new Date().toISOString();
-
-    const payment = memoryStore.payments.get(rCase.payment_id);
-    if (payment) {
-      payment.payment_status = 'RECOVERED';
-      payment.recovery_status = 'RECOVERED';
-      payment.recovered_amount = rCase.at_risk_amount;
+    if (case_id && (!txId || !resolvedAmount)) {
+      const existing = memoryStore.recoveryCases.get(case_id);
+      if (existing) {
+        txId = existing.transaction_id || existing.payment_id;
+        resolvedAmount = resolvedAmount || existing.at_risk_amount;
+        resolvedMethod = resolvedMethod || existing.payment_method;
+        resolvedReason = resolvedReason || existing.primary_failure_diagnosis;
+        resolvedRetry = existing.actions_taken_count || 0;
+        resolvedCustId = resolvedCustId || existing.customer_id;
+        resolvedCustName = resolvedCustName || existing.customer_name;
+        resolvedCustEmail = resolvedCustEmail || existing.customer_email;
+        resolvedCustPhone = resolvedCustPhone || existing.customer_phone;
+      }
     }
-  } else {
-    rCase.status = 'IN_PROGRESS';
-  }
 
-  // Audit entry
-  memoryStore.auditLogs.unshift({
-    id: `aud_${Date.now()}_case_action`,
-    actor_type: req.user ? (req.user.role === 'ADMIN' ? 'ADMIN_USER' : 'ANALYST_USER') : 'SYSTEM_AI_AGENT',
-    actor_id: req.user ? req.user.id : 'recoverai_autonomous_agent',
-    action_name: 'RECOVERY_WORKFLOW_ACTION_EXECUTED',
-    entity_type: 'RECOVERY_CASE',
-    entity_id: rCase.id,
-    previous_state: { status: rCase.status },
-    new_state: { actionType, isRecovered, recoveredAmount: isRecovered ? rCase.at_risk_amount : 0 },
-    ip_address: req.ip || '127.0.0.1',
-    user_agent: req.headers['user-agent'] || 'RecoverAI Agent Engine',
-    created_at: new Date().toISOString()
-  });
-
-  res.json({
-    success: true,
-    data: {
-      case: rCase,
-      action: actionRecord,
-      message: isRecovered
-        ? `Revenue of ₹${rCase.at_risk_amount.toLocaleString('en-IN')} successfully recovered!`
-        : `Recovery action ${actionType} triggered via ${channel}. Monitoring response stream.`
+    if (txId && (!resolvedAmount || !resolvedMethod)) {
+      const payment = memoryStore.payments.get(txId);
+      if (payment) {
+        resolvedAmount = resolvedAmount || payment.amount;
+        resolvedMethod = resolvedMethod || payment.payment_method;
+        resolvedReason = resolvedReason || payment.failure_reason || payment.failure_category;
+        resolvedRetry = resolvedRetry || payment.retry_count || 0;
+        resolvedCustId = resolvedCustId || payment.customer_id;
+        resolvedCustName = resolvedCustName || payment.customer_name;
+        resolvedCustEmail = resolvedCustEmail || payment.customer_email;
+        resolvedCustPhone = resolvedCustPhone || payment.customer_phone;
+      }
     }
-  });
+
+    if (!txId) {
+      return next(new AppError('transaction_id or case_id is required for AI analysis.', 400, 'BAD_REQUEST'));
+    }
+
+    const decision = await agent.analyze({
+      case_id,
+      transaction_id: txId,
+      amount: Number(resolvedAmount || 1000),
+      payment_method: resolvedMethod || 'UPI',
+      failure_reason: resolvedReason || 'Network Failure',
+      customer_id: resolvedCustId,
+      customer_name: resolvedCustName,
+      customer_email: resolvedCustEmail,
+      customer_phone: resolvedCustPhone,
+      retry_count: Number(resolvedRetry),
+      risk_score: risk_score !== undefined ? Number(risk_score) : undefined,
+      recovery_probability: recovery_probability !== undefined ? Number(recovery_probability) : undefined,
+      root_cause
+    });
+
+    res.json({
+      success: true,
+      data: decision
+    });
+  } catch (err: any) {
+    next(err);
+  }
 });
 
-recoveryRouter.post('/batch-diagnose', (_req: Request, res: Response) => {
-  const openCases = Array.from(memoryStore.recoveryCases.values()).filter((c) => c.status === 'OPEN').slice(0, 100);
+/**
+ * POST /api/recovery/execute
+ * Execute bounded recovery action in Razorpay Test Mode with verification & audit
+ */
+recoveryRouter.post('/execute', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { case_id, transaction_id, override_action, idempotency_key } = req.body;
 
-  let updatedCount = 0;
-  openCases.forEach((c) => {
-    c.status = 'IN_PROGRESS';
-    c.actions_taken_count += 1;
-    updatedCount++;
-  });
+    let targetCaseId = case_id;
+    if (!targetCaseId && transaction_id) {
+      const existing = Array.from(memoryStore.recoveryCases.values()).find(
+        (c) => c.transaction_id === transaction_id || c.payment_id === transaction_id
+      );
+      if (existing) {
+        targetCaseId = existing.id;
+      } else {
+        // Run analysis first to create case
+        const decision = await agent.analyze({
+          transaction_id,
+          amount: req.body.amount || 1000,
+          payment_method: req.body.payment_method || 'UPI',
+          failure_reason: req.body.failure_reason || 'Network Failure'
+        });
+        targetCaseId = decision.case_id;
+      }
+    }
 
-  memoryStore.auditLogs.unshift({
-    id: `aud_${Date.now()}_batch`,
-    actor_type: 'SYSTEM_AI_AGENT',
-    actor_id: 'recoverai_batch_processor',
-    action_name: 'BATCH_DIAGNOSTICS_EXECUTED',
-    entity_type: 'RECOVERY_BATCH',
-    entity_id: `batch_${Date.now()}`,
-    previous_state: null,
-    new_state: { openCasesDiagnosed: updatedCount },
-    ip_address: '127.0.0.1',
-    user_agent: 'RecoverAI ML Agent Daemon',
-    created_at: new Date().toISOString()
-  });
+    if (!targetCaseId) {
+      return next(new AppError('case_id or transaction_id is required for execution.', 400, 'BAD_REQUEST'));
+    }
 
+    const result = await agent.execute({
+      case_id: targetCaseId,
+      override_action: override_action as ControlledRecoveryAction,
+      idempotency_key
+    });
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/recovery/verify
+ * Explicit recovery status verification endpoint
+ */
+recoveryRouter.post('/verify', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { case_id } = req.body;
+    if (!case_id) {
+      return next(new AppError('case_id is required for verification.', 400, 'BAD_REQUEST'));
+    }
+
+    const result = await agent.verifyCase(case_id);
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/recovery/escalate
+ * Human operator escalation endpoint
+ */
+recoveryRouter.post('/escalate', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { case_id, reason, priority = 'HIGH', assigned_status = 'PENDING_REVIEW', operator_notes } = req.body;
+    if (!case_id) {
+      return next(new AppError('case_id is required for escalation.', 400, 'BAD_REQUEST'));
+    }
+
+    const result = await agent.escalate({
+      case_id,
+      reason: reason || 'Manual operator escalation requested from dashboard.',
+      priority,
+      assigned_status,
+      operator_notes
+    });
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/recovery/:id/audit and GET /api/recovery/cases/:id/audit
+ * Retrieve complete audit trail for a recovery case
+ */
+const getAuditHandler = (req: Request, res: Response, next: NextFunction) => {
+  const caseId = req.params.id;
+  if (!caseId) {
+    return next(new AppError('Case ID is required.', 400, 'BAD_REQUEST'));
+  }
+
+  const logs = auditService.getCaseAuditTrail(caseId);
   res.json({
     success: true,
     data: {
-      diagnosedCount: updatedCount,
-      message: `Successfully ran AI diagnostics on ${updatedCount} open recovery cases.`
+      case_id: caseId,
+      total_entries: logs.length,
+      audit_trail: logs
     }
   });
+};
+
+recoveryRouter.get('/:id/audit', getAuditHandler);
+recoveryRouter.get('/cases/:id/audit', getAuditHandler);
+
+/**
+ * POST /api/recovery/diagnose-all
+ * Run AI recovery agent diagnostics and policy checks across all open cases
+ */
+recoveryRouter.post('/diagnose-all', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cases = Array.from(memoryStore.recoveryCases.values());
+    let analyzedCount = 0;
+
+    for (const c of cases) {
+      await agent.analyze({
+        case_id: c.id,
+        transaction_id: c.transaction_id || c.payment_id || c.id,
+        amount: c.at_risk_amount,
+        payment_method: c.payment_method || 'UPI',
+        failure_reason: c.primary_failure_diagnosis || 'Network Failure',
+        retry_count: c.actions_taken_count || 0,
+        customer_id: c.customer_id,
+        customer_name: c.customer_name,
+        customer_email: c.customer_email,
+        customer_phone: c.customer_phone
+      });
+      analyzedCount++;
+    }
+
+    res.json({
+      success: true,
+      message: `AI Recovery Agent analyzed and evaluated policies for ${analyzedCount} cases.`,
+      data: {
+        analyzed_count: analyzedCount
+      }
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+/**
+ * Legacy support for manual intervention log / case action
+ */
+recoveryRouter.post('/cases/:id/action', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { actionType } = req.body;
+    const result = await agent.execute({
+      case_id: req.params.id,
+      override_action: actionType as ControlledRecoveryAction
+    });
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+recoveryRouter.post('/cases/:id/escalate', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await agent.escalate({
+      case_id: req.params.id,
+      reason: req.body.reason || 'Escalated by analyst'
+    });
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err: any) {
+    next(err);
+  }
 });
 
 recoveryRouter.get('/interventions', (req: Request, res: Response) => {
   const { status, type, limit = '50', page = '1' } = req.query;
   let actions = Array.from(memoryStore.recoveryActions.values());
-  
+
   if (status && status !== 'ALL') {
     actions = actions.filter((a) => a.status === status);
   }
@@ -181,22 +375,23 @@ recoveryRouter.get('/interventions', (req: Request, res: Response) => {
     actions = actions.filter((a) => a.action_type === type);
   }
 
-  // Sort descending
   actions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-  // Join case data
   const enriched = actions.map((act) => {
     const rCase = memoryStore.recoveryCases.get(act.case_id);
     return {
       ...act,
-      case: rCase ? {
-        id: rCase.id,
-        customer_name: rCase.customer_name,
-        at_risk_amount: rCase.at_risk_amount,
-        recovery_probability: rCase.recovery_probability,
-        risk_level: rCase.risk_level,
-        status: rCase.status
-      } : null
+      case: rCase
+        ? {
+            id: rCase.id,
+            customer_name: rCase.customer_name,
+            at_risk_amount: rCase.at_risk_amount,
+            recovery_probability: rCase.recovery_probability,
+            risk_level: rCase.risk_level,
+            status: rCase.status,
+            workflow_state: (rCase as any).workflow_state
+          }
+        : null
     };
   });
 
@@ -217,191 +412,3 @@ recoveryRouter.get('/interventions', (req: Request, res: Response) => {
     }
   });
 });
-
-recoveryRouter.post('/cases/:id/approve', (req: Request, res: Response, next: NextFunction) => {
-  const rCase = memoryStore.recoveryCases.get(req.params.id);
-  if (!rCase) {
-    return next(new AppError(`Recovery case not found: ${req.params.id}`, 404, 'NOT_FOUND'));
-  }
-
-  rCase.status = 'IN_PROGRESS';
-  rCase.actions_taken_count += 1;
-
-  const actionId = `act_${Date.now()}`;
-  const actionRecord = {
-    id: actionId,
-    case_id: rCase.id,
-    action_type: rCase.recommended_strategy || 'DYNAMIC_RETRY',
-    status: 'EXECUTED' as const,
-    trigger_channel: 'RAZORPAY_AUTONOMOUS',
-    payload_snapshot: { approval: 'APPROVED_BY_ANALYST', time: new Date().toISOString() },
-    result_response: 'Autonomous recovery workflow approved and queued for execution',
-    scheduled_for: new Date().toISOString(),
-    executed_at: new Date().toISOString(),
-    created_at: new Date().toISOString()
-  };
-
-  memoryStore.recoveryActions.set(actionId, actionRecord);
-
-  memoryStore.auditLogs.unshift({
-    id: `aud_${Date.now()}_approve`,
-    actor_type: req.user?.role === 'ADMIN' ? 'ADMIN_USER' : 'ANALYST_USER',
-    actor_id: req.user?.id || 'analyst_operator',
-    action_name: 'RECOVERY_CASE_APPROVED',
-    entity_type: 'RECOVERY_CASE',
-    entity_id: rCase.id,
-    previous_state: { status: 'OPEN' },
-    new_state: { status: 'IN_PROGRESS', approvedAt: new Date().toISOString() },
-    ip_address: req.ip || '127.0.0.1',
-    user_agent: req.headers['user-agent'] || 'RecoverAI Operator UI',
-    created_at: new Date().toISOString()
-  });
-
-  res.json({
-    success: true,
-    data: {
-      case: rCase,
-      message: `Recovery case #${rCase.id} approved. AI workflow initiated.`
-    }
-  });
-});
-
-recoveryRouter.post('/cases/:id/escalate', (req: Request, res: Response, next: NextFunction) => {
-  const rCase = memoryStore.recoveryCases.get(req.params.id);
-  if (!rCase) {
-    return next(new AppError(`Recovery case not found: ${req.params.id}`, 404, 'NOT_FOUND'));
-  }
-
-  rCase.status = 'IN_PROGRESS';
-  rCase.recommended_strategy = 'MANUAL_INTERVENTION';
-
-  const actionId = `act_${Date.now()}`;
-  const actionRecord = {
-    id: actionId,
-    case_id: rCase.id,
-    action_type: 'MANUAL_INTERVENTION',
-    status: 'PENDING_REVIEW' as const,
-    trigger_channel: 'HUMAN_SUPPORT',
-    payload_snapshot: { reason: req.body?.reason || 'Escalated by analyst for high priority manual handling' },
-    result_response: 'Assigned to senior recovery tier desk',
-    scheduled_for: new Date().toISOString(),
-    executed_at: new Date().toISOString(),
-    created_at: new Date().toISOString()
-  };
-
-  memoryStore.recoveryActions.set(actionId, actionRecord);
-
-  memoryStore.auditLogs.unshift({
-    id: `aud_${Date.now()}_escalate`,
-    actor_type: req.user?.role === 'ADMIN' ? 'ADMIN_USER' : 'ANALYST_USER',
-    actor_id: req.user?.id || 'analyst_operator',
-    action_name: 'RECOVERY_CASE_ESCALATED',
-    entity_type: 'RECOVERY_CASE',
-    entity_id: rCase.id,
-    previous_state: { strategy: rCase.recommended_strategy },
-    new_state: { strategy: 'MANUAL_INTERVENTION', escalated: true },
-    ip_address: req.ip || '127.0.0.1',
-    user_agent: req.headers['user-agent'] || 'RecoverAI Operator UI',
-    created_at: new Date().toISOString()
-  });
-
-  res.json({
-    success: true,
-    data: {
-      case: rCase,
-      message: `Recovery case #${rCase.id} escalated to human intervention desk.`
-    }
-  });
-});
-
-recoveryRouter.post('/cases/:id/stop', (req: Request, res: Response, next: NextFunction) => {
-  const rCase = memoryStore.recoveryCases.get(req.params.id);
-  if (!rCase) {
-    return next(new AppError(`Recovery case not found: ${req.params.id}`, 404, 'NOT_FOUND'));
-  }
-
-  rCase.status = 'UNRECOVERED';
-  rCase.closed_at = new Date().toISOString();
-
-  memoryStore.auditLogs.unshift({
-    id: `aud_${Date.now()}_stop`,
-    actor_type: req.user?.role === 'ADMIN' ? 'ADMIN_USER' : 'ANALYST_USER',
-    actor_id: req.user?.id || 'analyst_operator',
-    action_name: 'RECOVERY_CASE_STOPPED',
-    entity_type: 'RECOVERY_CASE',
-    entity_id: rCase.id,
-    previous_state: { status: rCase.status },
-    new_state: { status: 'UNRECOVERED', stoppedBy: 'User Action' },
-    ip_address: req.ip || '127.0.0.1',
-    user_agent: req.headers['user-agent'] || 'RecoverAI Operator UI',
-    created_at: new Date().toISOString()
-  });
-
-  res.json({
-    success: true,
-    data: {
-      case: rCase,
-      message: `Recovery workflow stopped for case #${rCase.id}.`
-    }
-  });
-});
-
-recoveryRouter.post('/batch-diagnose', (req: Request, res: Response) => {
-  try {
-    const predictor = MLRecoveryPredictor.getInstance();
-
-    const allPayments = Array.from(memoryStore.payments.values());
-    const failedPayments = allPayments.filter(
-      (p) => p.payment_status === 'FAILED' || p.payment_status === 'ABANDONED' || p.recovery_status === 'AT_RISK' || p.recovery_status === 'RECOVERING'
-    );
-
-    let updatedCount = 0;
-    const batchInput = failedPayments.slice(0, 100).map((p) => ({
-      transaction_id: p.transaction_id,
-      amount: p.amount,
-      payment_method: p.payment_method,
-      failure_reason: p.failure_reason || p.failure_category || 'Network Failure',
-      retry_count: p.retry_count ?? 0,
-      customer_age_days: p.customer_age_days ?? 45,
-      previous_transactions: (p.previous_successful_payments ?? 3) + (p.previous_failed_payments ?? 1),
-      successful_transactions: p.previous_successful_payments ?? 3,
-      failed_transactions: p.previous_failed_payments ?? 1
-    }));
-
-    const batchSummary = predictor.batchPredict(batchInput);
-
-    // Synchronize recovery cases with new ML predictions
-    for (const pred of batchSummary.predictions) {
-      const existingCase = Array.from(memoryStore.recoveryCases.values()).find(
-        (c) => c.transaction_id === pred.transaction_id || c.payment_id === pred.transaction_id
-      );
-
-      if (existingCase) {
-        existingCase.ml_recovery_probability = pred.recovery_probability;
-        existingCase.recovery_probability = pred.recovery_probability;
-        existingCase.risk_level = pred.risk_level === 'CRITICAL' ? 'HIGH' : pred.risk_level;
-        existingCase.primary_failure_diagnosis = pred.root_cause;
-        existingCase.recommended_strategy = pred.recommended_action;
-        existingCase.at_risk_amount = pred.revenue_at_risk;
-        updatedCount++;
-      }
-    }
-
-    res.json({
-      success: true,
-      message: `Batch diagnostic completed across ${batchSummary.total_transactions} transactions.`,
-      data: {
-        analyzed_count: batchSummary.total_transactions,
-        updated_cases_count: updatedCount,
-        batch_summary: batchSummary
-      }
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: { code: 'BATCH_DIAGNOSE_ERROR', message: error.message }
-    });
-  }
-});
-
-

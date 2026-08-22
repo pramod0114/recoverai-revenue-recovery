@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import { RecoveryCaseDetailModal } from '../components/common/RecoveryCaseDetailModal';
+import { BoundedWorkflowVisualizer } from '../components/common/BoundedWorkflowVisualizer';
 import {
   Target,
   Search,
@@ -15,7 +16,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
-  Download
+  Download,
+  Workflow,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export const RecoveryCasesPage: React.FC = () => {
@@ -29,6 +33,7 @@ export const RecoveryCasesPage: React.FC = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showWorkflowDiagram, setShowWorkflowDiagram] = useState(false);
 
   const fetchCases = async () => {
     try {
@@ -94,6 +99,14 @@ export const RecoveryCasesPage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setShowWorkflowDiagram(!showWorkflowDiagram)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#EFF6FF] border border-[#BFDBFE] hover:bg-[#DBEAFE] text-[#1D4ED8] rounded-lg text-xs font-semibold shadow-xs transition-colors"
+          >
+            <Workflow className="w-3.5 h-3.5" />
+            <span>{showWorkflowDiagram ? 'Hide Architecture' : 'View Workflow Architecture'}</span>
+            {showWorkflowDiagram ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
+          </button>
+          <button
             onClick={fetchCases}
             className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#EAECF0] hover:bg-[#F9FAFB] text-[#344054] rounded-lg text-xs font-semibold shadow-xs transition-colors"
           >
@@ -102,6 +115,19 @@ export const RecoveryCasesPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Collapsible Architecture Diagram */}
+      {showWorkflowDiagram && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+          <BoundedWorkflowVisualizer
+            currentState="RECOMMENDED"
+            policyPassed={true}
+            recoveryProbability={0.82}
+            riskScore={0.18}
+            recommendedAction="RETRY_PAYMENT"
+          />
+        </div>
+      )}
 
       {/* Filter Controls Bar */}
       <div className="bg-white p-4 rounded-xl border border-[#EAECF0] shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
@@ -169,11 +195,12 @@ export const RecoveryCasesPage: React.FC = () => {
               <tr>
                 <th className="py-3 px-4">Case ID</th>
                 <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">At-Risk Amount</th>
+                <th className="py-3 px-4">At-Risk</th>
                 <th className="py-3 px-4">Risk Level</th>
+                <th className="py-3 px-4">Win Prob</th>
                 <th className="py-3 px-4">AI Recommendation</th>
-                <th className="py-3 px-4">Win Probability</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Workflow State</th>
+                <th className="py-3 px-4">Action & Result</th>
                 <th className="py-3 px-4 text-right">Investigation</th>
               </tr>
             </thead>
@@ -181,6 +208,7 @@ export const RecoveryCasesPage: React.FC = () => {
               {cases.length > 0 ? (
                 cases.map((c) => {
                   const prob = Math.round((c.recovery_probability || 0.75) * 100);
+                  const workflowState = c.workflow_state || (c.status === 'RECOVERED' ? 'RECOVERED' : c.status === 'IN_PROGRESS' ? 'EXECUTING' : 'RECOMMENDED');
                   return (
                     <tr
                       key={c.id}
@@ -213,21 +241,8 @@ export const RecoveryCasesPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5 text-[#344054] font-medium">
-                          <Zap className="w-3 h-3 text-[#2563EB] shrink-0" />
-                          <span>
-                            {c.recommended_strategy
-                              ? c.recommended_strategy.replace(/_/g, ' ')
-                              : 'DYNAMIC RETRY'}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-[#667085] truncate max-w-[180px]">
-                          {c.primary_failure_diagnosis}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-[#F2F4F7] rounded-full h-1.5 overflow-hidden">
+                          <div className="w-12 bg-[#F2F4F7] rounded-full h-1.5 overflow-hidden">
                             <div
                               className={`h-full ${
                                 prob >= 75
@@ -239,23 +254,48 @@ export const RecoveryCasesPage: React.FC = () => {
                               style={{ width: `${prob}%` }}
                             />
                           </div>
-                          <span className="font-semibold text-[#171717]">{prob}%</span>
+                          <span className="font-semibold text-[#171717] text-[11px]">{prob}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-1.5 text-[#344054] font-medium text-xs">
+                          <Zap className="w-3 h-3 text-[#2563EB] shrink-0" />
+                          <span className="truncate max-w-[140px]">
+                            {c.recommended_strategy
+                              ? c.recommended_strategy.replace(/_/g, ' ')
+                              : 'RETRY PAYMENT'}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[#667085] truncate max-w-[140px]">
+                          {c.primary_failure_diagnosis}
                         </div>
                       </td>
                       <td className="py-3.5 px-4">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                            c.status === 'RECOVERED'
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide ${
+                            workflowState === 'RECOVERED'
                               ? 'bg-[#ECFDF3] text-[#16A34A] border border-[#A7F3D0]'
-                              : c.status === 'IN_PROGRESS'
+                              : workflowState === 'EXECUTING' || workflowState === 'VERIFYING'
                               ? 'bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]'
-                              : c.status === 'UNRECOVERED'
+                              : workflowState === 'APPROVED'
+                              ? 'bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0]'
+                              : workflowState === 'BLOCKED' || workflowState === 'FAILED'
                               ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
-                              : 'bg-[#FFF7ED] text-[#D97706] border border-[#FED7AA]'
+                              : workflowState === 'ESCALATED'
+                              ? 'bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]'
+                              : 'bg-[#F8FAFC] text-[#475467] border border-[#E2E8F0]'
                           }`}
                         >
-                          {c.status.replace('_', ' ')}
+                          {workflowState}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="text-[11px] text-[#171717] font-medium truncate max-w-[140px]">
+                          {c.executed_action ? c.executed_action.replace(/_/g, ' ') : c.actions_taken_count > 0 ? `${c.actions_taken_count} Retries` : 'Awaiting Trigger'}
+                        </div>
+                        <div className="text-[10px] text-[#667085] truncate max-w-[140px]">
+                          {c.result || (c.status === 'RECOVERED' ? 'Settled in test gateway' : 'Ready')}
+                        </div>
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <button
@@ -273,7 +313,7 @@ export const RecoveryCasesPage: React.FC = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#667085]">
+                  <td colSpan={9} className="py-12 text-center text-[#667085]">
                     No recovery cases match the selected filter.
                   </td>
                 </tr>

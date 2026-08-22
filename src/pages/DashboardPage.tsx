@@ -73,8 +73,8 @@ export const DashboardPage: React.FC = () => {
   const handleRunBatchDiagnostics = async () => {
     try {
       setIsDiagnosing(true);
-      const res = await api.batchDiagnose();
-      setToastMessage(res.data?.message || 'AI recovery diagnostics updated successfully');
+      const res = await api.diagnoseAllRecoveryCases();
+      setToastMessage(res.message || 'AI Recovery Agent analyzed and evaluated policies for all open cases.');
       await loadDashboardData();
     } catch (err: any) {
       setToastMessage(`Diagnostics error: ${err.message}`);
