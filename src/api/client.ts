@@ -56,15 +56,27 @@ export const api = {
   logout: () => request<any>('/auth/logout', { method: 'POST' }),
 
   // Dashboard
-  getKpis: () => request<any>('/dashboard/kpis'),
-  getTrend: (params?: { timeframe?: string; days?: number }) => {
+  getKpis: (params?: { timeframe?: string; days?: number; range?: string }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return request<any>(`/dashboard/kpis${query}`);
+  },
+  getTrend: (params?: { timeframe?: string; days?: number; range?: string }) => {
     const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
     return request<any[]>(`/dashboard/trend${query}`);
   },
-  getFunnel: () => request<any>('/dashboard/funnel'),
+  getFunnel: (params?: { timeframe?: string; days?: number; range?: string }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return request<any>(`/dashboard/funnel${query}`);
+  },
   globalSearch: (q: string) => request<any>(`/dashboard/search?q=${encodeURIComponent(q)}`),
-  getFailureBreakdown: () => request<any[]>('/dashboard/failure-breakdown'),
-  getInterventionsBreakdown: () => request<any>('/dashboard/interventions-breakdown'),
+  getFailureBreakdown: (params?: { timeframe?: string; days?: number; range?: string }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return request<any[]>(`/dashboard/failure-breakdown${query}`);
+  },
+  getInterventionsBreakdown: (params?: { timeframe?: string; days?: number; range?: string }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return request<any>(`/dashboard/interventions-breakdown${query}`);
+  },
   getRecentActivity: () => request<any[]>('/dashboard/recent-activity'),
 
   // Payments

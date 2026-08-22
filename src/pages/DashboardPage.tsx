@@ -53,14 +53,14 @@ export const DashboardPage: React.FC = () => {
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (selectedRange = dateRange) => {
     try {
       setLoading(true);
       const [kpiRes, trendRes, intervRes, failureRes, actRes, casesRes] = await Promise.all([
-        api.getKpis(),
-        api.getTrend(),
-        api.getInterventionsBreakdown(),
-        api.getFailureBreakdown(),
+        api.getKpis({ range: selectedRange }),
+        api.getTrend({ range: selectedRange }),
+        api.getInterventionsBreakdown({ range: selectedRange }),
+        api.getFailureBreakdown({ range: selectedRange }),
         api.getRecentActivity(),
         api.getRecoveryCases({ limit: 6 })
       ]);
@@ -79,8 +79,8 @@ export const DashboardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    loadDashboardData(dateRange);
+  }, [dateRange]);
 
   const formatLakhs = (val: number) => {
     if (!val) return '₹0';
@@ -123,22 +123,9 @@ export const DashboardPage: React.FC = () => {
       {/* Top Header & Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-[#171717] tracking-tight">
-              {getGreeting()}, {user?.fullName?.split(' ')[0] || 'Pramod'} 👋
-            </h1>
-            <a
-              href="https://github.com/pramod0114"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#F9FAFB] text-[#344054] hover:text-[#101828] border border-[#D0D5DD] hover:border-[#98A2B3] rounded-full text-xs font-semibold shadow-2xs transition-all group"
-              title="GitHub Profile: https://github.com/pramod0114"
-            >
-              <Github className="w-3.5 h-3.5 text-[#101828] group-hover:scale-110 transition-transform" />
-              <span>Created by <strong className="text-[#101828] font-bold">Pramod Mahajan</strong></span>
-              <ArrowUpRight className="w-3 h-3 text-[#98A2B3] group-hover:text-[#2563EB]" />
-            </a>
-          </div>
+          <h1 className="text-2xl lg:text-3xl font-extrabold text-[#171717] tracking-tight">
+            {getGreeting()} 👋
+          </h1>
           <p className="text-sm text-[#667085] mt-1">
             Real-time fintech revenue recovery control center & bounded AI workflows.
           </p>
@@ -451,7 +438,7 @@ export const DashboardPage: React.FC = () => {
       {/* Middle Row: Trend & Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <RevenueTrendChart data={trend} />
+          <RevenueTrendChart data={trend} dateRange={dateRange} />
         </div>
         <div>
           <InterventionDonutChart data={interventions} />
@@ -460,7 +447,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Conversion Funnel */}
       <div>
-        <RecoveryFunnel />
+        <RecoveryFunnel dateRange={dateRange} />
       </div>
 
       {/* Bottom Row: Recent Recovery Cases Table + Side Widgets */}

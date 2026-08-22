@@ -41,17 +41,27 @@ export const RevenueAnalyticsPage: React.FC = () => {
   const [trend, setTrend] = useState<any[]>([]);
   const [failureBreakdown, setFailureBreakdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState('Last 14 days');
+  const [showPeriodPicker, setShowPeriodPicker] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [exportSuccessMsg, setExportSuccessMsg] = useState<string | null>(null);
+
+  const datePresets = [
+    'Today',
+    'Last 7 days',
+    'Last 14 days',
+    'Last 30 days',
+    'This Quarter'
+  ];
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         const [kRes, tRes, fRes] = await Promise.all([
-          api.getKpis(),
-          api.getTrend(),
-          api.getFailureBreakdown()
+          api.getKpis({ range: period }),
+          api.getTrend({ range: period }),
+          api.getFailureBreakdown({ range: period })
         ]);
         setKpis(kRes.data);
         setTrend(tRes.data);
@@ -63,7 +73,7 @@ export const RevenueAnalyticsPage: React.FC = () => {
       }
     };
     load();
-  }, []);
+  }, [period]);
 
   const formatLakhs = (val: number) => {
     if (!val) return '₹0';
@@ -182,6 +192,42 @@ export const RevenueAnalyticsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 relative">
+          {/* Period Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowPeriodPicker(!showPeriodPicker)}
+              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#EAECF0] rounded-xl text-xs font-semibold text-[#344054] shadow-xs hover:bg-[#F9FAFB] transition-all"
+            >
+              <Calendar className="w-4 h-4 text-[#667085]" />
+              <span>{period}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-[#98A2B3]" />
+            </button>
+
+            {showPeriodPicker && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-[#EAECF0] rounded-xl shadow-lg p-1.5 z-50">
+                <div className="text-[11px] font-semibold text-[#98A2B3] px-3 py-1 uppercase">
+                  Select Period
+                </div>
+                {datePresets.map((preset) => (
+                  <button
+                    key={preset}
+                    onClick={() => {
+                      setPeriod(preset);
+                      setShowPeriodPicker(false);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                      period === preset
+                        ? 'bg-[#EFF6FF] text-[#2563EB] font-semibold'
+                        : 'text-[#344054] hover:bg-[#F9FAFB]'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}

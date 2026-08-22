@@ -13,26 +13,27 @@ import { api } from '../../api/client';
 
 interface RevenueTrendChartProps {
   data?: any[];
+  dateRange?: string;
 }
 
-export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: initialData }) => {
+export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: initialData, dateRange }) => {
   const [timeframe, setTimeframe] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
   const [trendData, setTrendData] = useState<any[]>(initialData || []);
   const [loading, setLoading] = useState(false);
 
-  // Sync initialData when parent loads data
+  // Sync initialData when parent loads data for new dateRange
   useEffect(() => {
-    if (initialData && initialData.length > 0 && timeframe === 'Daily') {
+    if (initialData && initialData.length > 0) {
       setTrendData(initialData);
     }
-  }, [initialData, timeframe]);
+  }, [initialData]);
 
   useEffect(() => {
     let isMounted = true;
     const fetchTrend = async () => {
       try {
         setLoading(true);
-        const res = await api.getTrend({ timeframe: timeframe.toLowerCase() });
+        const res = await api.getTrend({ timeframe: timeframe.toLowerCase(), range: dateRange });
         if (isMounted && res.data && res.data.length > 0) {
           setTrendData(res.data);
         }
@@ -46,7 +47,7 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: init
     return () => {
       isMounted = false;
     };
-  }, [timeframe]);
+  }, [timeframe, dateRange]);
 
   const defaultDailyFallback = [
     { date: '2025-05-05', label: '05-05', atRisk: 120000, expectedRecovery: 85000, recovered: 76000 },

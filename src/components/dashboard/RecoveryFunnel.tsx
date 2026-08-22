@@ -11,7 +11,11 @@ import {
   Info
 } from 'lucide-react';
 
-export const RecoveryFunnel: React.FC = () => {
+interface RecoveryFunnelProps {
+  dateRange?: string;
+}
+
+export const RecoveryFunnel: React.FC<RecoveryFunnelProps> = ({ dateRange }) => {
   const [funnelData, setFunnelData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +23,7 @@ export const RecoveryFunnel: React.FC = () => {
     const fetchFunnel = async () => {
       try {
         setLoading(true);
-        const res = await api.getFunnel();
+        const res = await api.getFunnel(dateRange ? { range: dateRange } : undefined);
         if (res.data) {
           setFunnelData(res.data);
         }
@@ -30,7 +34,7 @@ export const RecoveryFunnel: React.FC = () => {
       }
     };
     fetchFunnel();
-  }, []);
+  }, [dateRange]);
 
   const formatLakhs = (val: number) => {
     if (!val) return '₹0';
