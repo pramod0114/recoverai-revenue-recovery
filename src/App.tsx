@@ -14,6 +14,10 @@ import { AuditLogsPage } from './pages/AuditLogsPage';
 import { SystemHealthPage } from './pages/SystemHealthPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
+import { UserManagementPage } from './pages/admin/UserManagementPage';
+import { RecoveryPoliciesPage } from './pages/admin/RecoveryPoliciesPage';
+import { SystemConfigurationPage } from './pages/admin/SystemConfigurationPage';
+import { AccessRestricted } from './components/common/AccessRestricted';
 
 function ProtectedRoutes() {
   const { user, isLoading } = useAuth();
@@ -36,6 +40,14 @@ function ProtectedRoutes() {
   return <Layout />;
 }
 
+function AdminRoute({ element, pageName }: { element: React.ReactElement; pageName: string }) {
+  const { user } = useAuth();
+  if (user?.role !== 'ADMIN') {
+    return <AccessRestricted requiredRole="ADMIN" pageName={pageName} />;
+  }
+  return element;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -55,6 +67,20 @@ export default function App() {
             <Route path="/audit" element={<AuditLogsPage />} />
             <Route path="/system-health" element={<SystemHealthPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+
+            {/* Admin-only Routes */}
+            <Route
+              path="/admin/users"
+              element={<AdminRoute element={<UserManagementPage />} pageName="User Management" />}
+            />
+            <Route
+              path="/admin/policies"
+              element={<AdminRoute element={<RecoveryPoliciesPage />} pageName="Recovery Policies" />}
+            />
+            <Route
+              path="/admin/configuration"
+              element={<AdminRoute element={<SystemConfigurationPage />} pageName="System Configuration" />}
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

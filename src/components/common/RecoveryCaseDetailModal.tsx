@@ -185,6 +185,26 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
     }
   };
 
+  const handleAdminOverride = async (overrideReason: string) => {
+    try {
+      setActionLoading(true);
+      const actionToRun = confirmAction?.actionType || agentDecision?.recommended_action || caseData?.recommended_strategy || 'RETRY_PAYMENT';
+      const res = await api.overridePolicy({
+        case_id: caseData?.id,
+        reason: overrideReason,
+        override_action: actionToRun
+      });
+      setStatusMessage(`Admin Policy Override Executed: ${res.data?.details || 'Action completed successfully.'}`);
+      await loadCase();
+      if (onUpdated) onUpdated();
+    } catch (err: any) {
+      setStatusMessage(`Override error: ${err.message}`);
+    } finally {
+      setActionLoading(false);
+      setConfirmAction(null);
+    }
+  };
+
   const formatCurrency = (val: number) => `₹${Number(val || 0).toLocaleString('en-IN')}`;
   const prob = Math.round(((agentDecision?.recovery_probability ?? caseData?.recovery_probability) || 0.75) * 100);
   const workflowState = caseData?.workflow_state || (caseData?.status === 'RECOVERED' ? 'RECOVERED' : 'RECOMMENDED');
@@ -774,6 +794,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
           isOpen={true}
           onClose={() => setConfirmAction(null)}
           onConfirm={() => handleExecuteBoundedAction(confirmAction.actionType)}
+          onAdminOverride={handleAdminOverride}
           actionTitle={confirmAction.title}
           actionType={confirmAction.actionType}
           caseId={caseData?.id || caseId}

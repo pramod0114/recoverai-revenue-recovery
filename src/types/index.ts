@@ -5,25 +5,66 @@ export interface User {
   email: string;
   fullName: string;
   role: UserRole;
+  title?: string;
   lastLoginAt?: string;
+}
+
+export interface RecoveryPolicyConfig {
+  max_retries: number;
+  auto_retry_threshold: number;
+  min_amount_for_auto_action: number;
+  max_amount_for_auto_retry: number;
+  cooldown_seconds: number;
+  stop_after_success: boolean;
+  stop_after_max_retries: boolean;
+  require_idempotency: boolean;
+}
+
+export interface SystemConfiguration {
+  environment: string;
+  gatewayMode: 'TEST_MODE' | 'PRODUCTION';
+  mlModelVersion: string;
+  autonomousRecoveryEnabled: boolean;
+  riskScoreThreshold: number;
+  dunningChannel: string;
+  webhookUrl: string;
+  rateLimitPerMin: number;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export interface UserManagementItem {
+  id: string;
+  email: string;
+  fullName: string;
+  role: UserRole;
+  title?: string;
+  isActive: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
 }
 
 export interface DashboardKpis {
   totalProcessedVolume: number;
   revenueAtRisk: number;
   recoveredRevenue: number;
+  expectedRecovery: number;
   recoveryRate: number;
   failedPaymentsCount: number;
   successfulPaymentsCount: number;
   activeRecoveryCases: number;
+  highRiskCases: number;
+  escalatedCases: number;
   totalCustomers: number;
   currency: string;
+  periodComparison?: Record<string, { delta: number; is_positive: boolean }>;
 }
 
 export interface DailyTrendItem {
   date: string;
   atRisk: number;
   recovered: number;
+  expected: number;
   totalVolume: number;
 }
 
@@ -47,8 +88,8 @@ export interface PaymentItem {
   invoice_id: string | null;
   amount: number;
   currency: string;
-  payment_method: 'CARD_CREDIT' | 'CARD_DEBIT' | 'UPI' | 'NETBANKING' | 'WALLET' | 'AUTO_DEBIT';
-  payment_status: 'SUCCESSFUL' | 'FAILED' | 'PENDING' | 'RECOVERED' | 'ABANDONED' | 'REFUNDED';
+  payment_method: 'CARD_CREDIT' | 'CARD_DEBIT' | 'UPI' | 'NETBANKING' | 'WALLET' | 'AUTO_DEBIT' | string;
+  payment_status: 'SUCCESSFUL' | 'FAILED' | 'PENDING' | 'RECOVERED' | 'ABANDONED' | 'REFUNDED' | string;
   failure_code: string | null;
   failure_reason: string | null;
   failure_category: string;
@@ -74,7 +115,7 @@ export interface RecoveryCaseItem {
   ml_recovery_probability: number;
   primary_failure_diagnosis: string;
   recommended_strategy: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'RECOVERED' | 'FAILED' | 'DISMISSED';
+  status: 'OPEN' | 'IN_PROGRESS' | 'RECOVERED' | 'FAILED' | 'DISMISSED' | 'ESCALATED' | string;
   actions_taken_count: number;
   recovered_amount: number;
   recovered_at: string | null;
@@ -100,9 +141,14 @@ export interface AuditLogItem {
   id: string;
   actor_type: string;
   actor_id: string;
+  actor_name?: string;
+  actor_role?: 'ADMIN' | 'ANALYST' | 'SYSTEM' | string;
   action_name: string;
   entity_type: string;
   entity_id: string;
+  case_id?: string;
+  reason?: string;
+  result?: string;
   previous_state: any;
   new_state: any;
   ip_address: string | null;

@@ -22,7 +22,12 @@ import {
   AlertTriangle,
   Flame,
   UserX,
-  CreditCard
+  CreditCard,
+  UserCog,
+  Sliders,
+  Server,
+  Lock,
+  ShieldAlert
 } from 'lucide-react';
 import { RevenueTrendChart } from '../components/dashboard/RevenueTrendChart';
 import { InterventionDonutChart } from '../components/dashboard/InterventionDonutChart';
@@ -172,6 +177,83 @@ export const DashboardPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Role-Specific Operational / Governance Strip */}
+      {user?.role === 'ADMIN' ? (
+        <div className="p-4 bg-white border border-[#BFDBFE] rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#EFF6FF] via-white to-white">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#2563EB] text-white rounded-xl shadow-xs">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[#1E40AF] uppercase tracking-wider">
+                  Admin Governance Control Active
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DBEAFE] text-[#1D4ED8] border border-[#BFDBFE]">
+                  Full Access
+                </span>
+              </div>
+              <p className="text-xs text-[#667085] mt-0.5">
+                Chief Risk Officer privileges active. You can modify bounded policies, manage operators, and authorize critical overrides.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/admin/policies"
+              className="px-3 py-1.5 bg-white hover:bg-[#F9FAFB] text-[#344054] border border-[#D0D5DD] rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            >
+              <Sliders className="w-3.5 h-3.5 text-[#2563EB]" />
+              Policies ({kpis?.adminControl?.policyCount || 8})
+            </Link>
+            <Link
+              to="/admin/users"
+              className="px-3 py-1.5 bg-white hover:bg-[#F9FAFB] text-[#344054] border border-[#D0D5DD] rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            >
+              <UserCog className="w-3.5 h-3.5 text-[#2563EB]" />
+              Operators
+            </Link>
+            <Link
+              to="/admin/configuration"
+              className="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            >
+              <Server className="w-3.5 h-3.5 text-white" />
+              Gateway Config
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 bg-white border border-[#EAECF0] rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#F9FAFB] via-white to-white">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#F2F4F7] text-[#344054] rounded-xl border border-[#EAECF0]">
+              <Zap className="w-5 h-5 text-[#2563EB]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[#344054] uppercase tracking-wider">
+                  Analyst Recovery Desk
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F2F4F7] text-[#475467] border border-[#EAECF0]">
+                  Operator Mode
+                </span>
+              </div>
+              <p className="text-xs text-[#667085] mt-0.5">
+                Review at-risk transactions, execute AI recommended actions, and escalate high-value anomalies to CRO.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/recovery"
+              className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            >
+              <span>Triage Queue ({kpis?.activeRecoveryCases || 428})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ALL 8 Live KPI Cards in 4x2 responsive grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

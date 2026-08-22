@@ -98,6 +98,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(payload)
     }),
+  overridePolicy: (payload: { case_id: string; override_action?: string; reason: string; idempotency_key?: string }) =>
+    request<any>('/recovery/override', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
   verifyRecovery: (payload: { case_id: string; transaction_id?: string }) =>
     request<any>('/recovery/verify', {
       method: 'POST',
@@ -131,6 +136,32 @@ export const api = {
   },
   batchDiagnose: () => request<any>('/recovery/batch-diagnose', { method: 'POST' }),
 
+  // Administration (ADMIN Role Only)
+  getUsers: () => request<any[]>('/admin/users'),
+  createUser: (payload: { email: string; password?: string; fullName: string; role: string; title?: string }) =>
+    request<any>('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  updateUser: (id: string, payload: { role?: string; isActive?: boolean; fullName?: string; title?: string }) =>
+    request<any>(`/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    }),
+  getPolicies: () => request<any>('/admin/policies'),
+  updatePolicies: (payload: any) =>
+    request<any>('/admin/policies', {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    }),
+  getSystemConfiguration: () => request<any>('/admin/configuration'),
+  updateSystemConfiguration: (payload: any) =>
+    request<any>('/admin/configuration', {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    }),
+  getAdminOverrides: () => request<any[]>('/admin/overrides'),
+
   // ML Prediction Engine
   predictMl: (payload: { transaction_id?: string; amount?: number; payment_method?: string; failure_reason?: string; [key: string]: any }) =>
     request<any>('/ml/predict', {
@@ -154,5 +185,26 @@ export const api = {
   getAuditLogs: (params?: Record<string, string | number>) => {
     const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
     return request<any[]>(`/audit/logs${query}`);
-  }
+  },
+
+  // Razorpay Test-Mode Webhooks & Simulator
+  getWebhookEvents: () => request<any[]>('/webhooks/events'),
+  getWebhookConfig: () => request<any>('/webhooks/config'),
+  simulateWebhook: (payload: {
+    event_type?: string;
+    amount?: number;
+    failure_reason?: string;
+    failure_code?: string;
+    payment_method?: string;
+    customer_email?: string;
+    customer_name?: string;
+    simulate_invalid_signature?: boolean;
+    simulate_duplicate?: boolean;
+    duplicate_event_id?: string;
+  }) =>
+    request<any>('/webhooks/razorpay/simulate', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
 };
+

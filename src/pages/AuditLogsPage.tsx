@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import {
   History,
   Search,
@@ -12,10 +13,14 @@ import {
   User,
   CheckCircle2,
   Code,
-  X
+  X,
+  Lock,
+  Eye
 } from 'lucide-react';
 
 export const AuditLogsPage: React.FC = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -59,9 +64,22 @@ export const AuditLogsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#171717] tracking-tight flex items-center gap-2">
-            Immutable Audit Trail & Compliance Log
-          </h1>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-[#171717] tracking-tight flex items-center gap-2">
+              Immutable Audit Trail & Compliance Log
+            </h1>
+            {!isAdmin ? (
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F2F4F7] text-[#475467] border border-[#EAECF0] flex items-center gap-1">
+                <Eye className="w-3 h-3 text-[#667085]" />
+                Read-Only
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] flex items-center gap-1">
+                <Shield className="w-3 h-3 text-[#2563EB]" />
+                Admin Audit
+              </span>
+            )}
+          </div>
           <p className="text-xs text-[#667085] mt-1">
             Complete cryptographic audit trail of all automated AI interventions, analyst overrides, and state mutations.
           </p>

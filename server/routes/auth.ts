@@ -32,7 +32,8 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
         id: user.id,
         email: user.email,
         role: user.role,
-        fullName: user.full_name
+        fullName: user.full_name,
+        title: user.title
       },
       JWT_SECRET,
       { expiresIn: '24h' }
@@ -46,11 +47,13 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
       id: `aud_${Date.now()}_login`,
       actor_type: user.role === 'ADMIN' ? 'ADMIN_USER' : 'ANALYST_USER',
       actor_id: user.id,
+      actor_name: user.full_name,
+      actor_role: user.role,
       action_name: 'USER_LOGIN_SUCCESS',
       entity_type: 'USER',
       entity_id: user.id,
       previous_state: null,
-      new_state: { email: user.email, role: user.role, timestamp: new Date().toISOString() },
+      new_state: { email: user.email, role: user.role, title: user.title, timestamp: new Date().toISOString() },
       ip_address: req.ip || '127.0.0.1',
       user_agent: req.headers['user-agent'] || 'RecoverAI Client',
       created_at: new Date().toISOString()
@@ -65,6 +68,7 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
           email: user.email,
           fullName: user.full_name,
           role: user.role,
+          title: user.title,
           lastLoginAt: user.last_login_at
         }
       }

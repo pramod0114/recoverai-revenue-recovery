@@ -87,8 +87,9 @@ export const Navbar: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#171717] text-[15px] tracking-tight">RecoverAI</span>
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
-                Track 03
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] flex items-center gap-1 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] animate-pulse"></span>
+                TEST MODE
               </span>
             </div>
             <p className="text-[11px] text-[#667085] leading-none hidden sm:block">

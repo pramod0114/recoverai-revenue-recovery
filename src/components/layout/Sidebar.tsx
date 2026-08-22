@@ -12,66 +12,97 @@ import {
   History,
   Activity,
   Settings,
-  ShieldCheck,
-  CheckCircle2,
-  Sparkles
+  UserCog,
+  Sliders,
+  Server
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface NavItem {
   path: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  adminOnly?: boolean;
 }
 
 interface NavSection {
   title: string;
+  adminOnly?: boolean;
   items: NavItem[];
 }
 
-const NAV_SECTIONS: NavSection[] = [
-  {
-    title: 'OVERVIEW',
-    items: [
-      { path: '/', label: 'Dashboard', icon: LayoutDashboard }
-    ]
-  },
-  {
-    title: 'RECOVERY',
-    items: [
-      { path: '/recovery', label: 'Recovery Cases', icon: Target, badge: '428' },
-      { path: '/payments', label: 'Failed Payments', icon: CreditCard },
-      { path: '/interventions', label: 'Interventions', icon: Zap }
-    ]
-  },
-  {
-    title: 'ANALYTICS',
-    items: [
-      { path: '/analytics', label: 'Revenue Analytics', icon: BarChart3 },
-      { path: '/customers', label: 'Customers', icon: Users },
-      { path: '/reports', label: 'Reports', icon: FileSpreadsheet }
-    ]
-  },
-  {
-    title: 'SYSTEM',
-    items: [
-      { path: '/ai-activity', label: 'AI Activity', icon: Cpu, badge: 'Live' },
-      { path: '/audit', label: 'Audit Trail', icon: History },
-      { path: '/system-health', label: 'System Health', icon: Activity },
-      { path: '/settings', label: 'Settings', icon: Settings }
-    ]
-  }
-];
-
 export const Sidebar: React.FC = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+
+  const navSections: NavSection[] = [
+    {
+      title: 'OVERVIEW',
+      items: [
+        { path: '/', label: 'Dashboard', icon: LayoutDashboard }
+      ]
+    },
+    {
+      title: 'RECOVERY WORKFLOWS',
+      items: [
+        { path: '/recovery', label: 'Recovery Cases', icon: Target, badge: '428' },
+        { path: '/payments', label: 'Failed Payments', icon: CreditCard },
+        { path: '/interventions', label: 'Interventions', icon: Zap }
+      ]
+    },
+    {
+      title: 'ANALYTICS & INTELLIGENCE',
+      items: [
+        { path: '/analytics', label: 'Revenue Analytics', icon: BarChart3 },
+        { path: '/customers', label: 'Customers', icon: Users },
+        { path: '/reports', label: 'Reports', icon: FileSpreadsheet }
+      ]
+    },
+    {
+      title: 'SYSTEM & MONITORING',
+      items: [
+        { path: '/ai-activity', label: 'AI Activity', icon: Cpu, badge: 'Live' },
+        { path: '/audit', label: 'Audit Trail', icon: History },
+        { path: '/system-health', label: 'System Health', icon: Activity }
+      ]
+    },
+    ...(isAdmin
+      ? [
+          {
+            title: 'ADMINISTRATION & GOVERNANCE',
+            adminOnly: true,
+            items: [
+              { path: '/admin/users', label: 'User Management', icon: UserCog },
+              { path: '/admin/policies', label: 'Recovery Policies', icon: Sliders },
+              { path: '/admin/configuration', label: 'System Configuration', icon: Server }
+            ]
+          }
+        ]
+      : []),
+    {
+      title: 'PREFERENCES',
+      items: [
+        { path: '/settings', label: 'Settings', icon: Settings }
+      ]
+    }
+  ];
+
   return (
     <aside className="w-64 bg-white border-r border-[#EAECF0] flex flex-col justify-between shrink-0 min-h-[calc(100vh-64px)] select-none">
       <div className="p-4 space-y-6">
         {/* Navigation Sections */}
-        {NAV_SECTIONS.map((section) => (
+        {navSections.map((section) => (
           <div key={section.title} className="space-y-1">
-            <div className="text-[11px] font-semibold tracking-wider text-[#98A2B3] px-3 mb-1.5 uppercase">
-              {section.title}
+            <div className="flex items-center justify-between px-3 mb-1.5">
+              <span className="text-[11px] font-semibold tracking-wider text-[#98A2B3] uppercase">
+                {section.title}
+              </span>
+              {section.adminOnly && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                  ADMIN
+                </span>
+              )}
             </div>
             <nav className="space-y-0.5">
               {section.items.map((item) => {

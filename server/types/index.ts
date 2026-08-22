@@ -6,6 +6,7 @@ export interface UserRecord {
   password_hash: string;
   full_name: string;
   role: UserRole;
+  title?: string;
   is_active: boolean;
   last_login_at: string | null;
   created_at: string;
@@ -156,11 +157,16 @@ export interface MlPredictionRecord {
 
 export interface AuditLogRecord {
   id: string;
-  actor_type: 'SYSTEM_AI_AGENT' | 'ADMIN_USER' | 'ANALYST_USER' | 'WEBHOOK_EVENT';
+  actor_type: 'SYSTEM_AI_AGENT' | 'ADMIN_USER' | 'ANALYST_USER' | 'WEBHOOK_EVENT' | string;
   actor_id: string;
+  actor_name?: string;
+  actor_role?: 'ADMIN' | 'ANALYST' | 'SYSTEM' | string;
   action_name: string;
   entity_type: string;
   entity_id: string;
+  case_id?: string;
+  reason?: string;
+  result?: string;
   previous_state: Record<string, unknown> | null;
   new_state: Record<string, unknown> | null;
   ip_address: string | null;

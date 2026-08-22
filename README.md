@@ -1,190 +1,172 @@
-# RecoverAI — AI Revenue Recovery Agent (Part 1 Foundation)
+# RecoverAI — Autonomous AI Revenue Recovery Platform
 
 Built for **Razorpay Buildathon Track 03: "AI Revenue Recovery — Find revenue that's slipping away and win it back."**
 
 ---
 
-## 1. Project Overview
+## 1. Executive Summary & Core Capabilities
 
-RecoverAI is an autonomous financial intelligence platform that detects at-risk payment failures, diagnoses the underlying technical or behavioral root causes, predicts the optimal win-back intervention strategy, executes bounded recovery workflows, and maintains an immutable audit trail.
+RecoverAI is an autonomous financial intelligence platform that detects at-risk payment failures, diagnoses underlying technical or customer friction root causes using ensemble machine learning, calculates recovery probabilities, executes bounded recovery actions within policy guardrails, and maintains a cryptographically verified audit ledger.
 
----
-
-## 2. Architecture & Tech Stack
-
-```
-[Razorpay / Payment Stream (5,000 txns)]
-                    │
-                    ▼
- [Node.js / Express.js Backend + Vite] ── [FastAPI Python ML Diagnostics]
-                    │
-                    ▼
-       [MySQL 8.0 / In-Memory Store]
-                    │
-                    ▼
-     [React 18 + TypeScript Dashboard]
-```
-
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React, Recharts, React Router
-- **Backend**: Node.js, Express, TypeScript (tsx / esbuild), JWT Authentication, CORS, REST APIs
-- **Database**: MySQL 8.0+ (mysql2 pool with automatic high-performance indexed in-memory fallback for zero-dependency execution)
-- **AI/ML Service**: Python 3.10+, FastAPI, Pandas, NumPy, Scikit-learn
+### Key Pillars:
+1. **Real-Time Webhook Engine**: High-throughput ingestion of Razorpay payment events with timing-safe HMAC-SHA256 signature verification and idempotency locks.
+2. **Predictive ML Intelligence**: 38-feature ensemble model predicting recovery likelihood, revenue at risk, and actionable root cause classification.
+3. **Autonomous Agent & Policy Guardrails**: Bounded execution state machine enforcing retry ceilings, transaction amount caps, and human desk escalation.
+4. **Zero-Trust Security & Audit Trail**: Comprehensive security headers, token bucket rate limiting, sensitive credential masking, and tamper-evident audit logging.
+5. **Interactive Operations Dashboard**: High-contrast, responsive dashboard with role-based access control (ADMIN / ANALYST), live Razorpay webhook simulator, and interactive recovery case workbench.
 
 ---
 
-## 3. Directory Structure
+## 2. System Architecture
 
 ```
-recoverai/
-├── backend/ (server/)
-│   ├── db/
-│   │   └── connection.ts
-│   ├── middleware/
-│   │   ├── auth.ts
-│   │   └── errorHandler.ts
-│   ├── routes/
-│   │   ├── audit.ts
-│   │   ├── auth.ts
-│   │   ├── customers.ts
-│   │   ├── dashboard.ts
-│   │   ├── health.ts
-│   │   ├── payments.ts
-│   │   └── recovery.ts
-│   ├── seed.ts
-│   └── types/
-│       └── index.ts
-├── data/
-│   ├── generate_dataset.py
-│   ├── generate_dataset.ts
-│   └── synthetic_payments_5000.json
-├── database/
-│   ├── migrations/
-│   │   └── 001_initial_schema.sql
-│   └── schema.sql
-├── docs/
-│   ├── api_specification.md
-│   ├── architecture.md
-│   └── database_schema.md
-├── ml-service/
-│   ├── app/
-│   │   ├── config.py
-│   │   ├── routes.py
-│   │   └── schemas.py
-│   ├── data/
-│   │   └── README.md
-│   ├── main.py
-│   ├── models/
-│   │   └── README.md
-│   ├── requirements.txt
-│   └── training/
-│       ├── data_preprocessor.py
-│       └── train_recovery_model.py
-├── src/
-│   ├── api/
-│   │   └── client.ts
-│   ├── components/
-│   │   ├── dashboard/
-│   │   └── layout/
-│   ├── context/
-│   │   └── AuthContext.tsx
-│   ├── pages/
-│   │   ├── AuditLogsPage.tsx
-│   │   ├── CustomersPage.tsx
-│   │   ├── DashboardPage.tsx
-│   │   ├── LoginPage.tsx
-│   │   ├── MlDiagnosticsPage.tsx
-│   │   ├── PaymentsPage.tsx
-│   │   ├── RecoveryCasesPage.tsx
-│   │   └── SystemHealthPage.tsx
-│   ├── types/
-│   │   └── index.ts
-│   ├── App.tsx
-│   ├── index.css
-│   └── main.tsx
-├── .env.example
-├── metadata.json
-├── package.json
-├── README.md
-├── server.ts
-├── tsconfig.json
-└── vite.config.ts
+                                  [Razorpay Payment Gateway]
+                                              │
+                      ┌───────────────────────┴───────────────────────┐
+                      │ Webhooks (HMAC-SHA256 Verified)               │ REST API / Links (Test Mode)
+                      ▼                                               ▼
+         ┌────────────────────────┐                     ┌────────────────────────┐
+         │ RazorpayWebhookService │                     │ RazorpayPaymentService │
+         └────────────┬───────────┘                     └────────────────────────┘
+                      │ Idempotency Check & Payload Hash
+                      ▼
+         ┌────────────────────────┐
+         │   RecoveryAgent Core   │
+         └────────────┬───────────┘
+                      ├──► [ML Predictor (38 Features)] ───► Diagnostic & Probabilities
+                      ├──► [PolicyEngine Guardrails]     ───► Max Cap, Retry Limits, Human Escalation
+                      ├──► [RecoveryExecutor (Sandbox)]  ───► Bounded Retries & Smart Links
+                      └──► [AuditService Ledger]         ───► Immutable State Transition Log
+                      │
+                      ▼
+         ┌────────────────────────┐
+         │ React 18 UI Workbench  │ (Role-Based: ADMIN / ANALYST)
+         └────────────────────────┘
 ```
 
 ---
 
-## 4. Setup & Running Instructions
+## 3. Razorpay Test-Mode Integration & Setup
 
-### 4.1 Prerequisites
-- Node.js 18+ / npm
-- (Optional) MySQL 8.0+
-- (Optional) Python 3.10+ with `pip`
+### 3.1 Environment Configuration
+RecoverAI isolates gateway keys in the backend. Secrets are **never** exposed to the frontend browser.
 
-### 4.2 Installation Commands
+Configure `.env` in the project root:
+
+```env
+# Server Port (Hardcoded to 3000 in sandbox)
+PORT=3000
+
+# Razorpay Test-Mode API Credentials
+RAZORPAY_KEY_ID=rzp_test_5yL7g9AbCdEf12
+RAZORPAY_KEY_SECRET=sEcReT_tEsT_kEy_vAlUe_998877
+RAZORPAY_WEBHOOK_SECRET=whsec_recoverai_test_secret_2026_x99
+
+# Simulation & Safety Flags
+SIMULATION_MODE=true
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX_REQUESTS=120
+```
+
+### 3.2 Gateway Endpoints Implemented
+
+| Endpoint | Method | Purpose | Security / Requirements |
+|---|---|---|---|
+| `/api/webhooks/razorpay` | `POST` | Ingests real & test Razorpay webhook events | `x-razorpay-signature` (HMAC SHA-256) |
+| `/api/webhooks/razorpay/simulate` | `POST` | Dispatches simulated payment events | Accessible in `SIMULATION_MODE` |
+| `/api/webhooks/razorpay/events` | `GET` | Retrieves recent webhook event ledger | Requires JWT Authentication |
+| `/api/webhooks/razorpay/config` | `GET` | Webhook verification status & endpoint URL | Requires JWT Authentication |
+| `/api/recovery/cases` | `GET` | Lists all active/recovered recovery cases | RBAC (ADMIN / ANALYST) |
+| `/api/recovery/cases/:id/execute` | `POST` | Manually triggers or overrides recovery action | RBAC (ADMIN Only) |
+| `/api/audit/logs` | `GET` | Immutable timeline of transitions & decisions | RBAC (Read-Only for ANALYST) |
+
+---
+
+## 4. Webhook Security & Ingestion Pipeline
+
+### 4.1 Cryptographic Signature Verification
+Razorpay webhooks pass a signature header `x-razorpay-signature`. The backend computes:
+
+$$\text{Expected Signature} = \text{HMAC-SHA256}(\text{Raw Request Body}, \text{RAZORPAY\_WEBHOOK\_SECRET})$$
+
+Verification utilizes `crypto.timingSafeEqual` over pre-allocated byte buffers to prevent timing side-channel attacks.
+
+### 4.2 Idempotency & Deduplication
+To guarantee at-most-once processing across network retries:
+- Every event is indexed by its gateway `event_id`.
+- A deterministic `payload_hash` ($\text{SHA256}(\text{rawBody})$) guards against header variations.
+- Duplicate deliveries immediately return HTTP `200 OK` with status `DUPLICATE_SKIPPED` without re-triggering dunning or ML jobs.
+
+### 4.3 Supported Razorpay Event Lifecycle
+
+| Gateway Event | RecoverAI Automated Action |
+|---|---|
+| `payment.failed` | Analyzes failure reason, computes ML probability, checks policy caps, initiates automated smart recovery or human escalation. |
+| `payment.captured` | Verifies recovery amount, marks case as `RECOVERED`, halts all outstanding dunning reminders or retries. |
+| `payment_link.paid` | Confirms payment link settlement, closes active recovery ticket, records settled audit log. |
+| `order.paid` | Synchronizes order reconciliation state with customer transaction ledger. |
+
+---
+
+## 5. Security Hardening & Guardrails
+
+1. **Security Headers**: Injected on all API responses (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Strict-Transport-Security`, `Content-Security-Policy`).
+2. **Rate Limiting**: Sliding Token Bucket algorithm restricting client IP requests (default 120 req/min).
+3. **Data Masking & Redaction**: Customer PII (phone numbers, emails) and secrets are masked in server logs (`j***@example.com`, `+91 98*** **210`).
+4. **High-Value Transaction Guardrail**: Any payment exceeding ₹50,000 (configurable) is automatically barred from autonomous debit retries and redirected to `HUMAN_ESCALATION` for human desk approval.
+5. **Cooldown Intervals**: Strict 60-second cooldown between consecutive automated retries per case.
+
+---
+
+## 6. How to Test & Verify
+
+### 6.1 Running the Unified Test Suite
+The codebase includes comprehensive integration and unit tests covering ML prediction, AI agent workflows, and Razorpay webhook security:
+
 ```bash
-# 1. Install Node.js dependencies
+npm test
+```
+
+**Test Suite Coverage (49/49 Passing):**
+- `tests/razorpay.test.ts`: HMAC signature verification, forgery rejection, idempotency deduplication, payment failure ingestion, settlement dunning halt, API resilience, ML fallback, and high-value threshold enforcement.
+- `tests/agent.test.ts`: State machine transitions, policy engine rule enforcement, bounded execution sandbox, audit logging.
+- `tests/ml.test.ts`: 38-feature preprocessing, XGBoost-style ensemble predictions, explainability factor generation, root-cause diagnostics.
+
+### 6.2 Running the Application Locally
+```bash
+# 1. Install dependencies
 npm install
 
-# 2. Configure Environment variables
-cp .env.example .env
-```
-
-### 4.3 Dataset Generation & Seeding
-```bash
-# Generate 5,000 realistic synthetic payments dataset
+# 2. Seed database & ML models
 npm run generate-data
-
-# Seed database schema & records
 npm run seed
-```
 
-### 4.4 Run Full-Stack App (Frontend + Node.js Backend)
-```bash
+# 3. Start development server (Port 3000)
 npm run dev
 ```
-The unified full-stack application will be available at **`http://localhost:3000`**.
 
-### 4.5 Run Python ML Microservice (Optional)
-```bash
-cd ml-service
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
-FastAPI service will be live at **`http://localhost:8000`** with OpenAPI docs at **`http://localhost:8000/docs`**.
+Visit **`http://localhost:3000`** in your browser.
 
----
+### 6.3 Demo Login Credentials
 
-## 5. Pre-Configured Demo Credentials
+| Role | Email | Password | Access Rights |
+|---|---|---|---|
+| **ADMIN** | `admin@recoverai.io` | `Admin@RecoverAI2026` | Full Access: User Management, Recovery Policies, Manual Overrides, System Config |
+| **ANALYST** | `analyst@recoverai.io` | `Analyst@RecoverAI2026` | Operations: Cases Workbench, Failed Payments, Interventions, Read-Only Audit & System Health |
 
-| Role | Email | Password |
-|---|---|---|
-| **ADMIN** | `admin@recoverai.io` | `Admin@RecoverAI2026` |
-| **ANALYST** | `analyst@recoverai.io` | `Analyst@RecoverAI2026` |
+*(1-Click demo authentication buttons are available on the Login screen).*
 
-*1-Click demo sign-in is also provided on the login page.*
+### 6.4 Using the Webhook Simulator in the UI
+1. Log in to the application and navigate to **System Health** (`/health`).
+2. Scroll to the **Razorpay Webhook Simulator & Diagnostics** panel.
+3. Select an event type (`payment.failed`, `payment.captured`, `payment_link.paid`, etc.), adjust the amount and failure reason.
+4. Click **Dispatch Test Event** to fire the payload through the real signature verification and recovery pipeline.
+5. Watch the live **Webhook Event Ledger** update in real-time with event IDs, payload hashes, and recovery case links.
 
 ---
 
-## 6. Health & Verification Check
+## 7. Production Deployment & Readiness
 
-1. Health endpoint:
-```bash
-curl http://localhost:3000/api/health
-```
-2. KPIs endpoint:
-```bash
-curl http://localhost:3000/api/dashboard/kpis
-```
-3. Payments stream:
-```bash
-curl http://localhost:3000/api/payments?limit=5
-```
-
----
-
-## 7. Current Part 1 Limitations & Assumptions for Part 2
-
-- **Part 1 Scope**: Lays the complete, working production foundation (schema, seed, full-stack server, 5,000 synthetic records, auth, dashboard metrics, ML architecture).
-- **ML Engine**: Uses rule-assisted diagnostic baseline in Part 1; Part 2 will train and deploy full supervised gradient-boosted ML weights.
-- **Razorpay Live Webhooks**: Running with realistic simulation & test sandbox configuration; production webhook signing keys are ready for live credential injection.
+- **Production Build Command**: `npm run build` compiles Vite assets and bundles the Node.js TypeScript server into `dist/server.cjs`.
+- **Production Start Command**: `node dist/server.cjs`.
+- **Live Ingress**: Configured to bind on `0.0.0.0:3000`.

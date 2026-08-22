@@ -6,10 +6,9 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  Legend
+  Tooltip
 } from 'recharts';
-import { Info, Calendar } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 import { api } from '../../api/client';
 
 interface RevenueTrendChartProps {
@@ -21,52 +20,80 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: init
   const [trendData, setTrendData] = useState<any[]>(initialData || []);
   const [loading, setLoading] = useState(false);
 
+  // Sync initialData when parent loads data
   useEffect(() => {
+    if (initialData && initialData.length > 0 && timeframe === 'Daily') {
+      setTrendData(initialData);
+    }
+  }, [initialData, timeframe]);
+
+  useEffect(() => {
+    let isMounted = true;
     const fetchTrend = async () => {
       try {
         setLoading(true);
         const res = await api.getTrend({ timeframe: timeframe.toLowerCase() });
-        if (res.data) {
+        if (isMounted && res.data && res.data.length > 0) {
           setTrendData(res.data);
         }
       } catch (err) {
         console.error('Failed to fetch trend data:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchTrend();
+    return () => {
+      isMounted = false;
+    };
   }, [timeframe]);
 
-  // Format data for chart
-  const formattedData = (trendData && trendData.length > 0)
-    ? trendData.map((d) => ({
-        ...d,
-        formattedDate: d.date ? (d.date.length > 10 ? d.date : d.date.slice(5)) : '',
-        atRiskLakhs: Number(((d.atRisk || 0) / 100000).toFixed(2)),
-        expectedLakhs: Number(((d.expectedRecovery || d.atRisk * 0.65 || 0) / 100000).toFixed(2)),
-        recoveredLakhs: Number(((d.recovered || 0) / 100000).toFixed(2))
-      }))
-    : [
-        { date: '2025-05-12', formattedDate: '05-12', atRiskLakhs: 1.2, expectedLakhs: 0.85, recoveredLakhs: 0.78 },
-        { date: '2025-05-13', formattedDate: '05-13', atRiskLakhs: 1.45, expectedLakhs: 1.02, recoveredLakhs: 0.92 },
-        { date: '2025-05-14', formattedDate: '05-14', atRiskLakhs: 1.8, expectedLakhs: 1.28, recoveredLakhs: 1.15 },
-        { date: '2025-05-15', formattedDate: '05-15', atRiskLakhs: 1.6, expectedLakhs: 1.18, recoveredLakhs: 1.08 },
-        { date: '2025-05-16', formattedDate: '05-16', atRiskLakhs: 2.1, expectedLakhs: 1.55, recoveredLakhs: 1.45 },
-        { date: '2025-05-17', formattedDate: '05-17', atRiskLakhs: 1.95, expectedLakhs: 1.48, recoveredLakhs: 1.38 },
-        { date: '2025-05-18', formattedDate: '05-18', atRiskLakhs: 2.4, expectedLakhs: 1.78, recoveredLakhs: 1.62 }
-      ];
+  const defaultDailyFallback = [
+    { date: '2025-05-05', label: '05-05', atRisk: 120000, expectedRecovery: 85000, recovered: 76000 },
+    { date: '2025-05-06', label: '05-06', atRisk: 145000, expectedRecovery: 102000, recovered: 92000 },
+    { date: '2025-05-07', label: '05-07', atRisk: 135000, expectedRecovery: 95000, recovered: 87000 },
+    { date: '2025-05-08', label: '05-08', atRisk: 160000, expectedRecovery: 115000, recovered: 104000 },
+    { date: '2025-05-09', label: '05-09', atRisk: 180000, expectedRecovery: 128000, recovered: 115000 },
+    { date: '2025-05-10', label: '05-10', atRisk: 170000, expectedRecovery: 120000, recovered: 108000 },
+    { date: '2025-05-11', label: '05-11', atRisk: 195000, expectedRecovery: 138000, recovered: 125000 },
+    { date: '2025-05-12', label: '05-12', atRisk: 210000, expectedRecovery: 152000, recovered: 138000 },
+    { date: '2025-05-13', label: '05-13', atRisk: 190000, expectedRecovery: 135000, recovered: 122000 },
+    { date: '2025-05-14', label: '05-14', atRisk: 225000, expectedRecovery: 162000, recovered: 148000 },
+    { date: '2025-05-15', label: '05-15', atRisk: 240000, expectedRecovery: 175000, recovered: 159000 },
+    { date: '2025-05-16', label: '05-16', atRisk: 260000, expectedRecovery: 188000, recovered: 172000 },
+    { date: '2025-05-17', label: '05-17', atRisk: 250000, expectedRecovery: 180000, recovered: 165000 },
+    { date: '2025-05-18', label: '05-18', atRisk: 275000, expectedRecovery: 198000, recovered: 182000 }
+  ];
+
+  const sourceData = trendData && trendData.length > 0 ? trendData : defaultDailyFallback;
+
+  // Format data for Recharts
+  const formattedData = sourceData.map((d) => {
+    let cleanLabel = d.label || d.date || '';
+    if (cleanLabel.length === 10 && cleanLabel.startsWith('202')) {
+      cleanLabel = cleanLabel.slice(5); // "05-12"
+    }
+    return {
+      ...d,
+      formattedDate: cleanLabel,
+      fullTitle: d.date || d.label || cleanLabel,
+      atRiskLakhs: Number(((d.atRisk || 0) / 100000).toFixed(2)),
+      expectedLakhs: Number(((d.expectedRecovery || d.atRisk * 0.65 || 0) / 100000).toFixed(2)),
+      recoveredLakhs: Number(((d.recovered || 0) / 100000).toFixed(2))
+    };
+  });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const atRiskVal = payload.find((p: any) => p.dataKey === 'atRiskLakhs')?.value || 0;
-      const expectedVal = payload.find((p: any) => p.dataKey === 'expectedLakhs')?.value || 0;
-      const recoveredVal = payload.find((p: any) => p.dataKey === 'recoveredLakhs')?.value || 0;
+      const item = payload[0]?.payload;
+      const atRiskVal = payload.find((p: any) => p.dataKey === 'atRiskLakhs')?.value || item?.atRiskLakhs || 0;
+      const expectedVal = payload.find((p: any) => p.dataKey === 'expectedLakhs')?.value || item?.expectedLakhs || 0;
+      const recoveredVal = payload.find((p: any) => p.dataKey === 'recoveredLakhs')?.value || item?.recoveredLakhs || 0;
 
       return (
-        <div className="bg-white p-3.5 border border-[#EAECF0] rounded-xl shadow-xl text-xs space-y-2 z-50 min-w-[200px]">
+        <div className="bg-white p-3.5 border border-[#EAECF0] rounded-xl shadow-xl text-xs space-y-2 z-50 min-w-[210px]">
           <div className="font-semibold text-[#171717] pb-1 border-b border-[#EAECF0]">
-            {payload[0]?.payload?.date || label}
+            {item?.fullTitle || label}
           </div>
           <div className="flex items-center justify-between gap-4 text-[#16A34A]">
             <span className="flex items-center gap-1.5 font-medium">
@@ -96,9 +123,9 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: init
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#EAECF0] p-6 shadow-xs flex flex-col justify-between min-h-[380px]">
+    <div className="bg-white rounded-xl border border-[#EAECF0] p-6 shadow-xs flex flex-col justify-between h-[380px] w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2 shrink-0">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-bold text-[#171717]">Revenue Recovery Trend</h3>
           <div className="group relative cursor-pointer">
@@ -127,9 +154,14 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: init
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="flex-1 w-full min-h-[250px]">
-        <ResponsiveContainer width="100%" height="100%">
+      {/* Chart container with fixed height */}
+      <div className="w-full h-[240px] relative shrink-0">
+        {loading && (
+          <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
+            <Loader2 className="w-5 h-5 text-[#2563EB] animate-spin" />
+          </div>
+        )}
+        <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
             <defs>
               <linearGradient id="colorRecovered" x1="0" y1="0" x2="0" y2="1">
@@ -192,7 +224,7 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: init
       </div>
 
       {/* Footer Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-[#EAECF0] text-xs">
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-3 border-t border-[#EAECF0] text-xs shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#93C5FD]"></span>
           <span className="text-[#667085]">Revenue at Risk</span>
@@ -209,4 +241,3 @@ export const RevenueTrendChart: React.FC<RevenueTrendChartProps> = ({ data: init
     </div>
   );
 };
-

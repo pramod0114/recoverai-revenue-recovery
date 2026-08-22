@@ -12,6 +12,7 @@ export const DEFAULT_POLICY_CONFIG: PolicyConfig = {
 };
 
 export class PolicyEngine {
+  private static instance: PolicyEngine;
   public config: PolicyConfig;
   private recentExecutionTimestamps: Map<string, number> = new Map(); // case_id -> timestamp
 
@@ -19,6 +20,22 @@ export class PolicyEngine {
     this.config = {
       ...DEFAULT_POLICY_CONFIG,
       ...config
+    };
+  }
+
+  public static getInstance(config?: Partial<PolicyConfig>): PolicyEngine {
+    if (!PolicyEngine.instance) {
+      PolicyEngine.instance = new PolicyEngine(config);
+    } else if (config) {
+      PolicyEngine.instance.updateConfig(config);
+    }
+    return PolicyEngine.instance;
+  }
+
+  public updateConfig(newConfig: Partial<PolicyConfig>): void {
+    this.config = {
+      ...this.config,
+      ...newConfig
     };
   }
 
@@ -76,7 +93,21 @@ export class PolicyEngine {
       };
     }
 
-    // Policy Rule 3: STOP_AFTER_MAX_RETRIES & Retry Count Ceiling
+    // Policy Rule 3: High Value Safety Cap for Automated Actions
+    if (params.amount > this.config.max_amount_for_auto_retry) {
+      violations.push('HIGH_VALUE_MANUAL_REVIEW_REQUIRED');
+      return {
+        passed: false,
+        action: requestedAction,
+        allowed_action: 'HUMAN_ESCALATION',
+        policy_name: 'HIGH_VALUE_SAFETY_POLICY',
+        violations,
+        reason: `Transaction amount (₹${params.amount}) exceeds auto-action safety cap (₹${this.config.max_amount_for_auto_retry}). Manual operator review required.`,
+        is_automated: false
+      };
+    }
+
+    // Policy Rule 4: STOP_AFTER_MAX_RETRIES & Retry Count Ceiling
     if (requestedAction === 'RETRY_PAYMENT') {
       if (this.config.stop_after_max_retries && params.retry_count >= this.config.max_retries) {
         violations.push('MAX_RETRIES_EXCEEDED');
@@ -93,7 +124,7 @@ export class PolicyEngine {
         };
       }
 
-      // Policy Rule 4: AUTO_RETRY_THRESHOLD Gate
+      // Policy Rule 5: AUTO_RETRY_THRESHOLD Gate
       if (params.recovery_probability < this.config.auto_retry_threshold) {
         violations.push('LOW_PROBABILITY_RETRY_BLOCKED');
         allowedAction = params.recovery_probability >= 0.40 ? 'SEND_PAYMENT_REMINDER' : 'HUMAN_ESCALATION';
@@ -106,20 +137,6 @@ export class PolicyEngine {
           violations,
           reason: `Automated debit retry denied due to recovery probability (${(params.recovery_probability * 100).toFixed(0)}%) < ${(this.config.auto_retry_threshold * 100).toFixed(0)}%. Re-routed to ${allowedAction}.`,
           is_automated: allowedAction === 'SEND_PAYMENT_REMINDER'
-        };
-      }
-
-      // Policy Rule 5: High Value Safety Cap for Automated Retries
-      if (params.amount > this.config.max_amount_for_auto_retry) {
-        violations.push('HIGH_VALUE_MANUAL_REVIEW_REQUIRED');
-        return {
-          passed: false,
-          action: requestedAction,
-          allowed_action: 'HUMAN_ESCALATION',
-          policy_name: 'HIGH_VALUE_SAFETY_POLICY',
-          violations,
-          reason: `Transaction amount (₹${params.amount}) exceeds auto-retry safety cap (₹${this.config.max_amount_for_auto_retry}). Manual operator review required.`,
-          is_automated: false
         };
       }
 

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { initDatabase } from './server/db/connection.js';
 import { errorHandler } from './server/middleware/errorHandler.js';
+import { securityHeaders, rawBodySaver } from './server/middleware/security.js';
 import { healthRouter } from './server/routes/health.js';
 import { authRouter } from './server/routes/auth.js';
 import { dashboardRouter } from './server/routes/dashboard.js';
@@ -13,6 +14,8 @@ import { customersRouter } from './server/routes/customers.js';
 import { recoveryRouter } from './server/routes/recovery.js';
 import { mlRouter } from './server/routes/ml.js';
 import { auditRouter } from './server/routes/audit.js';
+import { adminRouter } from './server/routes/admin.js';
+import { webhooksRouter } from './server/routes/webhooks.js';
 
 dotenv.config();
 
@@ -20,10 +23,20 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Global Middlewares
+  // Security Headers & CORS
+  app.use(securityHeaders);
   app.use(cors({ origin: true, credentials: true }));
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true }));
+
+  // Request Body Parsing with Raw Body Preservation for HMAC Verification
+  app.use(
+    express.json({
+      limit: '10mb',
+      verify: (req: any, res: any, buf: Buffer, encoding: string) => {
+        rawBodySaver(req, res, buf, encoding);
+      }
+    })
+  );
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Initialize DB layer (MySQL + in-memory store fallback)
   await initDatabase();
@@ -37,6 +50,8 @@ async function startServer() {
   app.use('/api/recovery', recoveryRouter);
   app.use('/api/ml', mlRouter);
   app.use('/api/audit', auditRouter);
+  app.use('/api/admin', adminRouter);
+  app.use('/api/webhooks', webhooksRouter);
 
   // Centralized Error Handling Middleware for APIs
   app.use('/api', errorHandler);

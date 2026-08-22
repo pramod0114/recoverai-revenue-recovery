@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import { memoryStore } from '../db/connection.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { authenticate, requireRole } from '../middleware/auth.js';
 import { RecoveryAgent } from '../agent/RecoveryAgent.js';
 import { AuditService } from '../agent/AuditService.js';
 import { ControlledRecoveryAction } from '../agent/types.js';
@@ -175,6 +177,82 @@ recoveryRouter.post('/analyze', async (req: Request, res: Response, next: NextFu
 });
 
 /**
+ * POST /api/recovery/override
+ * ADMIN-ONLY Endpoint: Override automated safety policy on a blocked/restricted recovery case
+ */
+recoveryRouter.post('/override', authenticate, requireRole(['ADMIN']), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { case_id, override_action, reason, idempotency_key } = req.body;
+
+    if (!case_id) {
+      throw new AppError('case_id is required for policy override.', 400, 'VALIDATION_ERROR');
+    }
+
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 3) {
+      throw new AppError('A valid justification reason is mandatory for admin policy overrides.', 400, 'REASON_REQUIRED');
+    }
+
+    const targetCase = memoryStore.recoveryCases.get(case_id);
+    if (!targetCase) {
+      throw new AppError(`Recovery case with id ${case_id} not found.`, 404, 'NOT_FOUND');
+    }
+
+    const actionToRun = (override_action as ControlledRecoveryAction) || 'RETRY_PAYMENT';
+
+    // Execute through agent with override permission
+    const result = await agent.execute({
+      case_id,
+      override_action: actionToRun,
+      idempotency_key: idempotency_key || `idemp_ovr_${Date.now()}_${case_id}`
+    });
+
+    // Record high-visibility compliance audit log
+    const auditRecord = {
+      id: `aud_${Date.now()}_override`,
+      actor_type: 'ADMIN_USER',
+      actor_id: req.user!.id,
+      actor_name: req.user!.fullName,
+      actor_role: 'ADMIN',
+      action_name: 'POLICY_OVERRIDE',
+      entity_type: 'RECOVERY_CASE',
+      entity_id: case_id,
+      case_id,
+      reason: reason.trim(),
+      result: result.execution?.status || result.workflow_state || 'OVERRIDE_EXECUTED',
+      previous_state: {
+        status: targetCase.status,
+        workflow_state: (targetCase as any).workflow_state,
+        actions_taken: targetCase.actions_taken_count
+      },
+      new_state: {
+        action: actionToRun,
+        result: result.execution?.status || result.workflow_state,
+        authorized_by: req.user!.fullName,
+        role: req.user!.role,
+        reason: reason.trim(),
+        timestamp: new Date().toISOString()
+      },
+      ip_address: req.ip || '127.0.0.1',
+      user_agent: req.headers['user-agent'] || 'RecoverAI Admin Console',
+      created_at: new Date().toISOString()
+    };
+
+    memoryStore.auditLogs.unshift(auditRecord);
+
+    res.json({
+      success: true,
+      message: 'Admin policy override approved and executed.',
+      data: {
+        result,
+        audit: auditRecord
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * POST /api/recovery/execute
  * Execute bounded recovery action in Razorpay Test Mode with verification & audit
  */
@@ -210,6 +288,35 @@ recoveryRouter.post('/execute', async (req: Request, res: Response, next: NextFu
       override_action: override_action as ControlledRecoveryAction,
       idempotency_key
     });
+
+    // Mirror user context if authenticated
+    if (req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.replace('Bearer ', '');
+        const decoded: any = jwt.decode(token);
+        if (decoded) {
+          memoryStore.auditLogs.unshift({
+            id: `aud_${Date.now()}_exec_usr`,
+            actor_type: decoded.role === 'ADMIN' ? 'ADMIN_USER' : 'ANALYST_USER',
+            actor_id: decoded.id,
+            actor_name: decoded.fullName,
+            actor_role: decoded.role,
+            action_name: override_action || 'RECOVERY_ACTION_EXECUTE',
+            entity_type: 'RECOVERY_CASE',
+            entity_id: targetCaseId,
+            case_id: targetCaseId,
+            result: result.execution?.status || result.workflow_state,
+            previous_state: null,
+            new_state: { action: override_action, result: result.execution?.status || result.workflow_state },
+            ip_address: req.ip || '127.0.0.1',
+            user_agent: req.headers['user-agent'] || 'RecoverAI Portal',
+            created_at: new Date().toISOString()
+          });
+        }
+      } catch (tokenErr) {
+        // Ignore token decode failure
+      }
+    }
 
     res.json({
       success: true,

@@ -25,7 +25,29 @@ export const memoryStore = {
   recoveryCases: new Map<string, RecoveryCaseRecord>(),
   recoveryActions: new Map<string, RecoveryActionRecord>(),
   mlPredictions: new Map<string, MlPredictionRecord>(),
-  auditLogs: [] as AuditLogRecord[]
+  auditLogs: [] as AuditLogRecord[],
+  policyConfig: {
+    max_retries: 2,
+    auto_retry_threshold: 0.70,
+    min_amount_for_auto_action: 100,
+    max_amount_for_auto_retry: 100000,
+    cooldown_seconds: 2700,
+    stop_after_success: true,
+    stop_after_max_retries: true,
+    require_idempotency: true
+  },
+  systemConfig: {
+    environment: 'production-ready (sandbox)',
+    gatewayMode: 'TEST_MODE' as const,
+    mlModelVersion: 'recovery-model-v1 (Random Forest Ensemble)',
+    autonomousRecoveryEnabled: true,
+    riskScoreThreshold: 0.60,
+    dunningChannel: 'WHATSAPP_AND_SMS',
+    webhookUrl: 'https://api.recoverai.io/webhooks/razorpay/v1',
+    rateLimitPerMin: 120,
+    updatedAt: new Date().toISOString(),
+    updatedBy: 'Sarah Chen (Chief Risk Officer)'
+  }
 };
 
 export async function initDatabase(): Promise<void> {
@@ -75,11 +97,12 @@ async function seedDefaultUsers() {
     id: 'usr_admin_01',
     email: 'admin@recoverai.io',
     password_hash: adminPassHash,
-    full_name: 'Dr. Sarah Chen (Chief Risk Officer)',
+    full_name: 'Sarah Chen',
+    title: 'Chief Risk Officer',
     role: 'ADMIN',
     is_active: true,
     last_login_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 90 * 86400000).toISOString(),
     updated_at: new Date().toISOString()
   };
 
@@ -87,31 +110,72 @@ async function seedDefaultUsers() {
     id: 'usr_analyst_01',
     email: 'analyst@recoverai.io',
     password_hash: analystPassHash,
-    full_name: 'Devin Thorne (Payment Recovery Specialist)',
+    full_name: 'Devin Thorne',
+    title: 'Payment Recovery Analyst',
     role: 'ANALYST',
     is_active: true,
     last_login_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 60 * 86400000).toISOString(),
     updated_at: new Date().toISOString()
   };
 
   memoryStore.users.set(adminUser.email, adminUser);
   memoryStore.users.set(analystUser.email, analystUser);
 
-  // Add initial system audit entry
-  memoryStore.auditLogs.unshift({
-    id: `aud_${Date.now()}_init`,
-    actor_type: 'SYSTEM_AI_AGENT',
-    actor_id: 'recoverai_core_daemon',
-    action_name: 'SYSTEM_INITIALIZATION',
-    entity_type: 'SYSTEM',
-    entity_id: 'recoverai_v1',
-    previous_state: null,
-    new_state: { mode: isMySqlActive ? 'MYSQL_ACTIVE' : 'MEMORY_STORE_READY', timestamp: new Date().toISOString() },
-    ip_address: '127.0.0.1',
-    user_agent: 'RecoverAI/1.0.0 Daemon',
-    created_at: new Date().toISOString()
-  });
+  // Add initial system & sample role audit entries
+  memoryStore.auditLogs.unshift(
+    {
+      id: `aud_${Date.now() - 120000}_01`,
+      actor_type: 'ADMIN_USER',
+      actor_id: 'usr_admin_01',
+      actor_name: 'Sarah Chen',
+      actor_role: 'ADMIN',
+      action_name: 'POLICY_OVERRIDE',
+      entity_type: 'RECOVERY_CASE',
+      entity_id: 'RC-10291',
+      case_id: 'RC-10291',
+      reason: 'Temporary bank gateway outage resolved; manual off-peak retry authorized',
+      result: 'OVERRIDE_APPROVED',
+      previous_state: { state: 'POLICY_BLOCKED', retry_count: 2 },
+      new_state: { state: 'EXECUTING', action: 'RETRY_PAYMENT', authorized_by: 'Sarah Chen' },
+      ip_address: '192.168.1.104',
+      user_agent: 'RecoverAI/Admin-Console (macOS)',
+      created_at: new Date(Date.now() - 120000).toISOString()
+    },
+    {
+      id: `aud_${Date.now() - 360000}_02`,
+      actor_type: 'ANALYST_USER',
+      actor_id: 'usr_analyst_01',
+      actor_name: 'Devin Thorne',
+      actor_role: 'ANALYST',
+      action_name: 'RETRY_PAYMENT',
+      entity_type: 'RECOVERY_CASE',
+      entity_id: 'RC-10292',
+      case_id: 'RC-10292',
+      reason: 'Scheduled standard automated retry following network timeout',
+      result: 'RECOVERED',
+      previous_state: { state: 'APPROVED', status: 'IN_PROGRESS' },
+      new_state: { state: 'RECOVERED', recovered_amount: 14999 },
+      ip_address: '192.168.1.118',
+      user_agent: 'RecoverAI/Analyst-Portal (Windows)',
+      created_at: new Date(Date.now() - 360000).toISOString()
+    },
+    {
+      id: `aud_${Date.now() - 900000}_03`,
+      actor_type: 'SYSTEM_AI_AGENT',
+      actor_id: 'recoverai_core_daemon',
+      actor_name: 'AI Decision Engine',
+      actor_role: 'SYSTEM',
+      action_name: 'SYSTEM_INITIALIZATION',
+      entity_type: 'SYSTEM',
+      entity_id: 'recoverai_v1',
+      previous_state: null,
+      new_state: { mode: isMySqlActive ? 'MYSQL_ACTIVE' : 'MEMORY_STORE_READY', timestamp: new Date().toISOString() },
+      ip_address: '127.0.0.1',
+      user_agent: 'RecoverAI/1.0.0 Daemon',
+      created_at: new Date(Date.now() - 900000).toISOString()
+    }
+  );
 }
 
 export async function seedInitialData(): Promise<number> {
