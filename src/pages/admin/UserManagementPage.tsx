@@ -316,7 +316,7 @@ export const UserManagementPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#2563EB] flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> ADMIN ROLE (Sarah Chen)
+                <ShieldCheck className="w-4 h-4" /> ADMIN ROLE (Pramod Mahajan)
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#EFF6FF] text-[#2563EB] font-bold border border-[#BFDBFE]">
                 SUPERUSER

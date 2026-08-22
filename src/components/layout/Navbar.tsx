@@ -26,6 +26,16 @@ export const Navbar: React.FC = () => {
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
+  const initials = user?.fullName
+    ? user.fullName
+        .split(' ')
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase()
+    : 'PM';
+
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -207,7 +217,7 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-[#F2F4F7] transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] text-[#2563EB] flex items-center justify-center font-bold text-xs">
-              PM
+              {initials}
             </div>
             <div className="text-left hidden sm:block">
               <div className="text-[13px] font-semibold text-[#171717] leading-tight">

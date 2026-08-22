@@ -46,7 +46,7 @@ export const memoryStore = {
     webhookUrl: 'https://api.recoverai.io/webhooks/razorpay/v1',
     rateLimitPerMin: 120,
     updatedAt: new Date().toISOString(),
-    updatedBy: 'Sarah Chen (Chief Risk Officer)'
+    updatedBy: 'Pramod Mahajan (Chief Risk Officer)'
   }
 };
 
@@ -97,8 +97,8 @@ async function seedDefaultUsers() {
     id: 'usr_admin_01',
     email: 'admin@recoverai.io',
     password_hash: adminPassHash,
-    full_name: 'Sarah Chen',
-    title: 'Chief Risk Officer',
+    full_name: 'Pramod Mahajan',
+    title: 'Chief Risk Officer & Lead Administrator',
     role: 'ADMIN',
     is_active: true,
     last_login_at: new Date().toISOString(),
@@ -128,7 +128,7 @@ async function seedDefaultUsers() {
       id: `aud_${Date.now() - 120000}_01`,
       actor_type: 'ADMIN_USER',
       actor_id: 'usr_admin_01',
-      actor_name: 'Sarah Chen',
+      actor_name: 'Pramod Mahajan',
       actor_role: 'ADMIN',
       action_name: 'POLICY_OVERRIDE',
       entity_type: 'RECOVERY_CASE',
@@ -137,7 +137,7 @@ async function seedDefaultUsers() {
       reason: 'Temporary bank gateway outage resolved; manual off-peak retry authorized',
       result: 'OVERRIDE_APPROVED',
       previous_state: { state: 'POLICY_BLOCKED', retry_count: 2 },
-      new_state: { state: 'EXECUTING', action: 'RETRY_PAYMENT', authorized_by: 'Sarah Chen' },
+      new_state: { state: 'EXECUTING', action: 'RETRY_PAYMENT', authorized_by: 'Pramod Mahajan' },
       ip_address: '192.168.1.104',
       user_agent: 'RecoverAI/Admin-Console (macOS)',
       created_at: new Date(Date.now() - 120000).toISOString()

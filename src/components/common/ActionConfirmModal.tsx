@@ -175,7 +175,7 @@ export const ActionConfirmModal: React.FC<ActionConfirmModalProps> = ({
                       <Lock className="w-3 h-3" /> Admin Privilege Override
                     </span>
                     <span className="font-mono text-[10px] px-1.5 py-0.5 bg-white rounded border border-[#FECACA]">
-                      Sarah Chen (ADMIN)
+                      Pramod Mahajan (ADMIN)
                     </span>
                   </div>
                   <textarea

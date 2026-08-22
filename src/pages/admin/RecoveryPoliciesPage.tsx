@@ -399,7 +399,7 @@ export const RecoveryPoliciesPage: React.FC = () => {
                 overrides.map((ovr) => (
                   <tr key={ovr.id} className="hover:bg-[#F9FAFB] transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-[#171717]">{ovr.actor_name || 'Sarah Chen'}</div>
+                      <div className="font-semibold text-[#171717]">{ovr.actor_name || 'Pramod Mahajan'}</div>
                       <div className="text-[11px] text-[#2563EB] font-medium">{ovr.actor_role || 'ADMIN'}</div>
                     </td>
                     <td className="py-3.5 px-4 font-mono font-semibold text-[#171717]">

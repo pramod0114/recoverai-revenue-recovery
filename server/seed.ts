@@ -64,7 +64,7 @@ async function runSeed() {
 
     await connection.query(
       `INSERT INTO users (id, email, password_hash, full_name, role) VALUES 
-       ('usr_admin_01', 'admin@recoverai.io', ?, 'Dr. Sarah Chen (Chief Risk Officer)', 'ADMIN'),
+       ('usr_admin_01', 'admin@recoverai.io', ?, 'Pramod Mahajan (Chief Risk Officer)', 'ADMIN'),
        ('usr_analyst_01', 'analyst@recoverai.io', ?, 'Devin Thorne (Recovery Specialist)', 'ANALYST')
        ON DUPLICATE KEY UPDATE full_name=VALUES(full_name)`,
       [adminPass, analystPass]
