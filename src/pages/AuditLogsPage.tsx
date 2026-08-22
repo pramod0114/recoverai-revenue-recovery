@@ -4,17 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import {
   History,
   Search,
-  Filter,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
   Shield,
   Bot,
   User,
-  CheckCircle2,
-  Code,
-  X,
-  Lock,
   Eye
 } from 'lucide-react';
 
@@ -27,7 +22,6 @@ export const AuditLogsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
   const fetchLogs = async () => {
     try {
@@ -120,7 +114,7 @@ export const AuditLogsPage: React.FC = () => {
                 <th className="py-3 px-4">Entity Targeted</th>
                 <th className="py-3 px-4">IP / Origin</th>
                 <th className="py-3 px-4">Timestamp</th>
-                <th className="py-3 px-4 text-right">Payload Diff</th>
+                <th className="py-3 px-4">State Transition</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#EAECF0]">
@@ -128,8 +122,7 @@ export const AuditLogsPage: React.FC = () => {
                 logs.map((l) => (
                   <tr
                     key={l.id}
-                    onClick={() => setSelectedLog(l)}
-                    className="hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+                    className="hover:bg-[#F9FAFB] transition-colors"
                   >
                     <td className="py-3.5 px-4 font-mono font-semibold text-[#171717]">{l.id}</td>
                     <td className="py-3.5 px-4">
@@ -157,16 +150,8 @@ export const AuditLogsPage: React.FC = () => {
                     <td className="py-3.5 px-4 text-[#667085]">
                       {l.created_at ? new Date(l.created_at).toLocaleString() : 'Recent'}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedLog(l);
-                        }}
-                        className="px-2.5 py-1 bg-[#F2F4F7] hover:bg-[#EAECF0] text-[#344054] rounded-md font-semibold text-xs transition-colors flex items-center gap-1 ml-auto"
-                      >
-                        <Code className="w-3 h-3" /> Diff
-                      </button>
+                    <td className="py-3.5 px-4 text-[11px] font-mono text-[#344054]">
+                      {l.previous_state?.state || l.previous_state?.status || '-'} &rarr; <span className="text-[#16A34A] font-semibold">{l.new_state?.state || l.new_state?.status || 'UPDATED'}</span>
                     </td>
                   </tr>
                 ))
@@ -205,56 +190,6 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* JSON Diff Inspector Modal */}
-      {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-2xl w-full max-w-xl p-6 space-y-4 animate-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-[#EAECF0] pb-3">
-              <div>
-                <h3 className="text-base font-bold text-[#171717]">Audit Mutation Payload</h3>
-                <p className="text-xs text-[#667085]">{selectedLog.id} • {selectedLog.action_name}</p>
-              </div>
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="p-1 rounded-lg text-[#98A2B3] hover:text-[#171717] hover:bg-[#F2F4F7]"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <div className="font-semibold text-[#344054] mb-1">State Mutation Delta (JSON)</div>
-                <pre className="p-3 bg-[#F9FAFB] border border-[#EAECF0] rounded-xl font-mono text-[11px] text-[#171717] overflow-x-auto max-h-60">
-                  {JSON.stringify(
-                    {
-                      actor: selectedLog.actor_id,
-                      actor_type: selectedLog.actor_type,
-                      entity: `${selectedLog.entity_type} (#${selectedLog.entity_id})`,
-                      previous_state: selectedLog.previous_state,
-                      new_state: selectedLog.new_state,
-                      ip_address: selectedLog.ip_address,
-                      timestamp: selectedLog.created_at
-                    },
-                    null,
-                    2
-                  )}
-                </pre>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-[#EAECF0] flex justify-end">
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg text-xs font-semibold"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
