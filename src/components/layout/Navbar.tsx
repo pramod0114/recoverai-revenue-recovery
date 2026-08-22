@@ -12,7 +12,8 @@ import {
   Shield,
   RefreshCw,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  Github
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { GlobalSearchDropdown } from '../common/GlobalSearchDropdown';
@@ -116,6 +117,18 @@ export const Navbar: React.FC = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-4">
+        {/* Creator GitHub Link */}
+        <a
+          href="https://github.com/pramod0114"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-[#F9FAFB] hover:bg-[#F2F4F7] border border-[#EAECF0] hover:border-[#D0D5DD] rounded-lg text-[12px] text-[#344054] hover:text-[#101828] transition-all group"
+          title="Created by Pramod Mahajan (GitHub: https://github.com/pramod0114)"
+        >
+          <Github className="w-3.5 h-3.5 text-[#101828] group-hover:scale-110 transition-transform" />
+          <span className="font-medium">Pramod Mahajan</span>
+        </a>
+
         {/* Live sync pill */}
         <div className="hidden md:flex items-center gap-2 px-2.5 py-1 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg text-[12px] text-[#475467]">
           <span className="w-2 h-2 rounded-full bg-[#16A34A]"></span>

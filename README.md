@@ -190,8 +190,9 @@ Visit **`http://localhost:3000`** in your browser.
 
 ---
 
-## 7. Production Deployment & Readiness
+## 8. Author & Project Credits
 
-- **Production Build Command**: `npm run build` compiles Vite assets and bundles the Node.js TypeScript server into `dist/server.cjs`.
-- **Production Start Command**: `node dist/server.cjs`.
-- **Live Ingress**: Configured to bind on `0.0.0.0:3000`.
+**Created by Pramod Mahajan**
+- **GitHub**: [@pramod0114](https://github.com/pramod0114) — [https://github.com/pramod0114](https://github.com/pramod0114)
+- **Project**: RecoverAI — Autonomous AI Revenue Recovery Platform
+- **Track**: Razorpay Buildathon Track 03: *AI Revenue Recovery*
