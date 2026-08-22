@@ -1,0 +1,6 @@
+{
+  "name": "RecoverAI - AI Revenue Recovery Agent",
+  "description": "Autonomous AI revenue recovery platform diagnosing payment failures and executing bounded recovery workflows.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
