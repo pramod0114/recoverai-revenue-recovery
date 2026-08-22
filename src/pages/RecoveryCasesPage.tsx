@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../api/client';
 import { RecoveryCaseDetailModal } from '../components/common/RecoveryCaseDetailModal';
-import { BoundedWorkflowVisualizer } from '../components/common/BoundedWorkflowVisualizer';
 import { ActionConfirmModal } from '../components/common/ActionConfirmModal';
 import {
   Target,
@@ -18,7 +17,6 @@ import {
   ChevronRight,
   Shield,
   Download,
-  Workflow,
   ChevronDown,
   ChevronUp,
   SlidersHorizontal,
@@ -42,7 +40,6 @@ export const RecoveryCasesPage: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [actionConfirmCase, setActionConfirmCase] = useState<any | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [showWorkflowDiagram, setShowWorkflowDiagram] = useState(false);
 
   const fetchCases = async () => {
     try {
@@ -181,14 +178,6 @@ export const RecoveryCasesPage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowWorkflowDiagram(!showWorkflowDiagram)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-[#EFF6FF] border border-[#BFDBFE] hover:bg-[#DBEAFE] text-[#1D4ED8] rounded-lg text-xs font-semibold shadow-xs transition-colors"
-          >
-            <Workflow className="w-3.5 h-3.5" />
-            <span>{showWorkflowDiagram ? 'Hide State Machine' : 'State Machine Architecture'}</span>
-            {showWorkflowDiagram ? <ChevronUp className="w-3.5 h-3.5 ml-0.5" /> : <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
-          </button>
-          <button
             onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#EAECF0] hover:bg-[#F9FAFB] text-[#344054] rounded-lg text-xs font-semibold shadow-xs transition-colors"
             title="Export CSV"
@@ -205,19 +194,6 @@ export const RecoveryCasesPage: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Collapsible Architecture Diagram */}
-      {showWorkflowDiagram && (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-          <BoundedWorkflowVisualizer
-            currentState="RECOMMENDED"
-            policyPassed={true}
-            recoveryProbability={0.82}
-            riskScore={0.18}
-            recommendedAction="RETRY_PAYMENT"
-          />
-        </div>
-      )}
 
       {/* Filter Controls Bar */}
       <div className="bg-white p-4 rounded-xl border border-[#EAECF0] shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">

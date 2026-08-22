@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api/client';
-import { BoundedWorkflowVisualizer } from './BoundedWorkflowVisualizer';
 import { ActionConfirmModal } from './ActionConfirmModal';
 import {
   X,
@@ -50,7 +49,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'workflow' | 'actions' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'actions' | 'audit'>('overview');
   const [confirmAction, setConfirmAction] = useState<{
     actionType: string;
     title: string;
@@ -314,17 +313,6 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
             AI Decision & Investigation
           </button>
           <button
-            onClick={() => setActiveTab('workflow')}
-            className={`py-3 px-4 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
-              activeTab === 'workflow'
-                ? 'border-[#2563EB] text-[#2563EB] bg-white'
-                : 'border-transparent hover:text-[#171717]'
-            }`}
-          >
-            <Workflow className="w-3.5 h-3.5" />
-            Bounded State Machine
-          </button>
-          <button
             onClick={() => setActiveTab('actions')}
             className={`py-3 px-4 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
               activeTab === 'actions'
@@ -482,30 +470,6 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                 </div>
               </div>
             </>
-          ) : activeTab === 'workflow' ? (
-            /* Dedicated Bounded Workflow Architecture Visualizer */
-            <div className="space-y-6">
-              <BoundedWorkflowVisualizer
-                currentState={workflowState}
-                policyPassed={!isExceededRetry}
-                recoveryProbability={agentDecision?.recovery_probability ?? caseData?.recovery_probability ?? 0.75}
-                riskScore={caseData?.risk_score ?? 0.25}
-                recommendedAction={agentDecision?.recommended_action || caseData?.recommended_strategy || 'RETRY_PAYMENT'}
-                isRecovered={workflowState === 'RECOVERED'}
-                isFailed={workflowState === 'FAILED'}
-                isEscalated={workflowState === 'ESCALATED'}
-              />
-
-              <div className="bg-[#F8FAFC] p-4 rounded-xl border border-[#EAECF0] space-y-2 text-xs">
-                <h4 className="font-bold text-[#1E293B] flex items-center gap-1.5">
-                  <Shield className="w-4 h-4 text-[#2563EB]" />
-                  Why Bounded Workflows Guarantee Autonomous Safety
-                </h4>
-                <p className="text-[#475467] leading-relaxed">
-                  Every recovery decision passes through an immutable policy check before execution. If a case exceeds 2 retry attempts, the policy engine immediately blocks further automated debits to protect customer trust and avoid gateway chargeback penalties.
-                </p>
-              </div>
-            </div>
           ) : activeTab === 'actions' ? (
             /* Policy-Aware Action Panel */
             <div className="space-y-6">
