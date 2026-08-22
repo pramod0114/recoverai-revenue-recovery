@@ -15,12 +15,12 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { GlobalSearchDropdown } from '../common/GlobalSearchDropdown';
 
 export const Navbar: React.FC = () => {
   const { user, logout, quickLoginAs } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [liveSyncTime, setLiveSyncTime] = useState('Just now');
   const notifRef = useRef<HTMLDivElement>(null);
@@ -98,15 +98,8 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Global Search Bar */}
-        <div className="hidden lg:flex items-center relative w-72">
-          <Search className="w-4 h-4 text-[#98A2B3] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search cases, payments, customers..."
-            className="w-full pl-9 pr-3 py-1.5 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg text-[13px] text-[#171717] placeholder-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all"
-          />
+        <div className="hidden lg:block w-72">
+          <GlobalSearchDropdown />
         </div>
       </div>
 

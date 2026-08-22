@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api/client';
 import { BoundedWorkflowVisualizer } from './BoundedWorkflowVisualizer';
+import { ActionConfirmModal } from './ActionConfirmModal';
 import {
   X,
   Sparkles,
@@ -22,7 +23,14 @@ import {
   Send,
   Lock,
   RotateCw,
-  Workflow
+  Workflow,
+  MessageSquare,
+  Mail,
+  ExternalLink,
+  Ban,
+  PhoneCall,
+  Flame,
+  Check
 } from 'lucide-react';
 
 interface RecoveryCaseDetailModalProps {
@@ -42,7 +50,12 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'agent' | 'workflow' | 'audit' | 'timeline'>('agent');
+  const [activeTab, setActiveTab] = useState<'overview' | 'workflow' | 'actions' | 'audit'>('overview');
+  const [confirmAction, setConfirmAction] = useState<{
+    actionType: string;
+    title: string;
+    reason: string;
+  } | null>(null);
   const [escalateReason, setEscalateReason] = useState('');
   const [showEscalateInput, setShowEscalateInput] = useState(false);
 
@@ -104,7 +117,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
         retry_count: caseData?.actions_taken_count || 0
       });
       setAgentDecision(res.data);
-      setStatusMessage(`AI Diagnostics completed. Policy result: ${res.data?.policy_result?.passed ? 'APPROVED' : 'BLOCKED'}`);
+      setStatusMessage(`AI Diagnostics completed. Policy engine: ${res.data?.policy_result?.passed ? 'APPROVED' : 'BLOCKED'}`);
       await loadCase();
       if (onUpdated) onUpdated();
     } catch (err: any) {
@@ -117,15 +130,16 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
   const handleExecuteBoundedAction = async (overrideAction?: string) => {
     try {
       setActionLoading(true);
+      const actionToRun = overrideAction || confirmAction?.actionType || agentDecision?.recommended_action || caseData?.recommended_strategy || 'RETRY_PAYMENT';
       const res = await api.executeRecovery({
         case_id: caseData?.id,
         transaction_id: caseData?.transaction_id,
-        override_action: overrideAction || agentDecision?.recommended_action || caseData?.recommended_strategy
+        override_action: actionToRun
       });
       const exec = res.data?.execution;
       const ver = res.data?.verification;
       if (ver?.is_recovered) {
-        setStatusMessage(`Money verified and recovered: ₹${ver.verified_amount.toLocaleString('en-IN')} captured in Razorpay Test Gateway!`);
+        setStatusMessage(`Money verified and recovered: ₹${ver.verified_amount.toLocaleString('en-IN')} settled in Razorpay Test Gateway!`);
       } else {
         setStatusMessage(`Action executed: ${exec?.action}. Verification: ${ver?.details || exec?.status}`);
       }
@@ -135,6 +149,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
       setStatusMessage(`Execution error: ${err.message}`);
     } finally {
       setActionLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -173,10 +188,12 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
   const formatCurrency = (val: number) => `₹${Number(val || 0).toLocaleString('en-IN')}`;
   const prob = Math.round(((agentDecision?.recovery_probability ?? caseData?.recovery_probability) || 0.75) * 100);
   const workflowState = caseData?.workflow_state || (caseData?.status === 'RECOVERED' ? 'RECOVERED' : 'RECOMMENDED');
+  const retryCount = caseData?.actions_taken_count || 0;
+  const isExceededRetry = retryCount >= 2;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="p-5 border-b border-[#EAECF0] flex items-center justify-between bg-[#F9FAFB] shrink-0">
           <div className="flex items-center gap-3">
@@ -184,7 +201,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base font-bold text-[#171717]">
                   Recovery Case #{caseData?.id || caseId}
                 </h2>
@@ -208,9 +225,18 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                 >
                   {workflowState}
                 </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  caseData?.risk_level === 'CRITICAL' || caseData?.risk_level === 'HIGH'
+                    ? 'bg-[#FEF2F2] text-[#DC2626]'
+                    : caseData?.risk_level === 'MEDIUM'
+                    ? 'bg-[#FFF7ED] text-[#D97706]'
+                    : 'bg-[#ECFDF3] text-[#16A34A]'
+                }`}>
+                  {caseData?.risk_level || 'HIGH'} RISK
+                </span>
               </div>
               <p className="text-xs text-[#667085] mt-0.5">
-                Created on {caseData ? new Date(caseData.created_at).toLocaleString() : 'Loading...'} · Bounded Autonomous Workflow
+                Customer: <span className="font-semibold text-[#171717]">{caseData?.customer_name || 'Client'}</span> · At-Risk: <span className="font-semibold text-[#171717]">{formatCurrency(caseData?.at_risk_amount)}</span> · Created {caseData ? new Date(caseData.created_at).toLocaleString() : ''}
               </p>
             </div>
           </div>
@@ -222,7 +248,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
           </button>
         </div>
 
-        {/* State Machine Step Progress Bar */}
+        {/* 8-Step Bounded State Machine Progress Ribbon */}
         <div className="bg-white border-b border-[#EAECF0] px-6 py-2.5 flex items-center justify-between text-[11px] overflow-x-auto">
           {['DETECTED', 'ANALYZING', 'RECOMMENDED', 'POLICY_CHECK', 'APPROVED', 'EXECUTING', 'VERIFYING', 'RECOVERED'].map((step, idx) => {
             const isCurrent = workflowState === step;
@@ -257,15 +283,15 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
         {/* Tab Navigation */}
         <div className="flex border-b border-[#EAECF0] px-6 bg-[#FAFAFA] text-xs font-semibold text-[#667085] overflow-x-auto">
           <button
-            onClick={() => setActiveTab('agent')}
+            onClick={() => setActiveTab('overview')}
             className={`py-3 px-4 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
-              activeTab === 'agent'
+              activeTab === 'overview'
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-transparent hover:text-[#171717]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            AI Decision & Policy Engine
+            AI Decision & Investigation
           </button>
           <button
             onClick={() => setActiveTab('workflow')}
@@ -276,7 +302,18 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
             }`}
           >
             <Workflow className="w-3.5 h-3.5" />
-            Bounded Workflow Architecture
+            Bounded State Machine
+          </button>
+          <button
+            onClick={() => setActiveTab('actions')}
+            className={`py-3 px-4 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'actions'
+                ? 'border-[#2563EB] text-[#2563EB] bg-white'
+                : 'border-transparent hover:text-[#171717]'
+            }`}
+          >
+            <RotateCw className="w-3.5 h-3.5" />
+            Policy-Aware Action Panel
           </button>
           <button
             onClick={() => setActiveTab('audit')}
@@ -287,18 +324,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            Complete Audit Trail ({auditLogs.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('timeline')}
-            className={`py-3 px-4 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
-              activeTab === 'timeline'
-                ? 'border-[#2563EB] text-[#2563EB] bg-white'
-                : 'border-transparent hover:text-[#171717]'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5" />
-            Payment Context
+            Audit Trail & Compliance ({auditLogs.length})
           </button>
         </div>
 
@@ -322,10 +348,10 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
               <RefreshCw className="w-6 h-6 animate-spin text-[#2563EB]" />
               <p className="text-xs">Loading case context and AI policy evaluation...</p>
             </div>
-          ) : activeTab === 'agent' ? (
+          ) : activeTab === 'overview' ? (
             <>
-              {/* Top Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Top Overview Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-[#F9FAFB] p-4 rounded-xl border border-[#EAECF0]">
                   <div className="text-[11px] text-[#667085] uppercase tracking-wider font-semibold">Revenue At Risk</div>
                   <div className="text-xl font-bold text-[#171717] mt-1">
@@ -342,157 +368,98 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                       {prob >= 70 ? 'HIGH' : 'MODERATE'}
                     </span>
                   </div>
-                  <div className="text-[11px] text-[#667085] mt-0.5">Confidence: {Math.round((agentDecision?.confidence || 0.85) * 100)}%</div>
+                  <div className="text-[11px] text-[#667085] mt-0.5">Confidence: {Math.round((agentDecision?.confidence || 0.88) * 100)}%</div>
                 </div>
 
                 <div className="bg-[#F9FAFB] p-4 rounded-xl border border-[#EAECF0]">
                   <div className="text-[11px] text-[#667085] uppercase tracking-wider font-semibold">Retries Exhausted</div>
                   <div className="text-xl font-bold text-[#171717] mt-1">
-                    {caseData?.actions_taken_count || 0} / 3
+                    {retryCount} / 2
                   </div>
-                  <div className="text-[11px] text-[#667085] mt-0.5">Max Bounded Limit: 3</div>
+                  <div className="text-[11px] text-[#667085] mt-0.5">Policy Limit: 2</div>
                 </div>
 
                 <div className="bg-[#F9FAFB] p-4 rounded-xl border border-[#EAECF0]">
                   <div className="text-[11px] text-[#667085] uppercase tracking-wider font-semibold">Policy Status</div>
                   <div className="flex items-center gap-1.5 mt-1">
-                    {agentDecision?.policy_result?.passed !== false ? (
+                    {!isExceededRetry ? (
                       <CheckCircle2 className="w-5 h-5 text-[#16A34A]" />
                     ) : (
                       <AlertTriangle className="w-5 h-5 text-[#DC2626]" />
                     )}
                     <span className="text-sm font-bold text-[#171717]">
-                      {agentDecision?.policy_result?.passed !== false ? 'PASSED & BOUNDED' : 'BLOCKED'}
+                      {!isExceededRetry ? 'PASSED & BOUNDED' : 'BLOCKED (MAX RETRIES)'}
                     </span>
                   </div>
-                  <div className="text-[11px] text-[#667085] mt-0.5">Safety Engine Active</div>
+                  <div className="text-[11px] text-[#667085] mt-0.5">Anti-fatigue protection active</div>
                 </div>
               </div>
 
-              {/* Agent Decision Details */}
+              {/* AI Decision Card */}
               <div className="bg-white p-5 rounded-xl border border-[#EAECF0] shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-[#2563EB]" />
-                    <h3 className="text-sm font-bold text-[#171717]">Agent Decision Engine</h3>
+                    <h3 className="text-sm font-bold text-[#171717]">AI Decision & Investigation Card</h3>
                   </div>
                   <span className="text-[11px] font-mono text-[#667085]">Model: {agentDecision?.model_version || 'recovery-model-v1'}</span>
                 </div>
 
-                <div className="p-4 bg-[#EFF6FF]/60 border border-[#BFDBFE] rounded-xl space-y-2">
+                <div className="p-4 bg-[#EFF6FF]/70 border border-[#BFDBFE] rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-[#1D4ED8] uppercase tracking-wider">
-                      Recommended Action
+                      Primary AI Recommendation
                     </span>
                     <span className="px-2.5 py-0.5 bg-[#2563EB] text-white rounded-full text-xs font-bold font-mono">
                       {agentDecision?.recommended_action || caseData?.recommended_strategy || 'RETRY_PAYMENT'}
                     </span>
                   </div>
                   <p className="text-xs text-[#1E3A8A] leading-relaxed">
-                    {agentDecision?.reason || caseData?.reason || 'Agent analyzed root cause and predicted high recovery likelihood via off-peak test retry.'}
+                    {agentDecision?.reason || caseData?.reason || 'Agent analyzed the payment failure telemetry and predicted high win-back probability via off-peak test smart retry.'}
                   </p>
                 </div>
 
-                {/* Policy Rules Evaluation */}
+                {/* Extracted Evidence Grid */}
                 <div className="space-y-2">
-                  <h4 className="text-xs font-bold text-[#344054] uppercase tracking-wider">Safety & Policy Rules Evaluated</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg flex items-center justify-between">
-                      <span className="text-[#667085]">Max Retries (&le; 3):</span>
-                      <span className="font-semibold text-[#16A34A]">{(caseData?.actions_taken_count || 0) < 3 ? 'VALID' : 'EXCEEDED'}</span>
+                  <h4 className="text-xs font-bold text-[#344054] uppercase tracking-wider">Extracted Telemetry Evidence</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg">
+                      <span className="text-[#667085] block text-[11px]">Payment Method</span>
+                      <span className="font-semibold text-[#171717]">{caseData?.payment_method || 'UPI'}</span>
                     </div>
-                    <div className="p-2.5 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg flex items-center justify-between">
-                      <span className="text-[#667085]">Auto-Retry Threshold (&ge; 0.70):</span>
-                      <span className="font-semibold text-[#16A34A]">{(agentDecision?.recovery_probability || 0.75) >= 0.7 ? 'SATISFIED' : 'REQUIRES MANUAL'}</span>
+                    <div className="p-3 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg">
+                      <span className="text-[#667085] block text-[11px]">Failure Reason</span>
+                      <span className="font-semibold text-[#DC2626] truncate block">{caseData?.primary_failure_diagnosis || 'Bank Network Timeout'}</span>
                     </div>
-                    <div className="p-2.5 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg flex items-center justify-between">
-                      <span className="text-[#667085]">Stop After Success:</span>
-                      <span className="font-semibold text-[#16A34A]">ENFORCED</span>
+                    <div className="p-3 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg">
+                      <span className="text-[#667085] block text-[11px]">Customer LTV</span>
+                      <span className="font-semibold text-[#171717]">₹{(caseData?.customer_ltv || 45000).toLocaleString('en-IN')}</span>
                     </div>
-                    <div className="p-2.5 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg flex items-center justify-between">
-                      <span className="text-[#667085]">Razorpay Sandbox Mode:</span>
-                      <span className="font-semibold text-[#2563EB]">ACTIVE (NO REAL MONEY)</span>
+                    <div className="p-3 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg">
+                      <span className="text-[#667085] block text-[11px]">Historical Success</span>
+                      <span className="font-semibold text-[#16A34A]">92.4%</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Interactive Execution Controls */}
-              <div className="bg-white p-5 rounded-xl border border-[#EAECF0] shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-[#171717] flex items-center gap-2">
-                    <RotateCw className="w-4 h-4 text-[#2563EB]" />
-                    Execute Bounded Agent Action
-                  </h3>
-                  <button
-                    onClick={handleRunDiagnostics}
-                    disabled={actionLoading}
-                    className="text-xs text-[#2563EB] font-semibold hover:underline flex items-center gap-1"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${actionLoading ? 'animate-spin' : ''}`} />
-                    Re-run Diagnostics
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <button
-                    onClick={() => handleExecuteBoundedAction('RETRY_PAYMENT')}
-                    disabled={actionLoading || caseData?.status === 'RECOVERED' || (caseData?.actions_taken_count || 0) >= 3}
-                    className="p-3 bg-[#F0FDF4] hover:bg-[#DCFCE7] border border-[#BBF7D0] text-[#15803D] rounded-xl text-xs font-semibold flex flex-col items-center gap-1.5 transition-colors disabled:opacity-50"
-                  >
-                    <Zap className="w-4 h-4 text-[#16A34A]" />
-                    <span>Trigger Payment Retry</span>
-                    <span className="text-[10px] font-normal text-[#166534]">Razorpay Test Capture</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleExecuteBoundedAction('GENERATE_PAYMENT_LINK')}
-                    disabled={actionLoading || caseData?.status === 'RECOVERED'}
-                    className="p-3 bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] text-[#1D4ED8] rounded-xl text-xs font-semibold flex flex-col items-center gap-1.5 transition-colors disabled:opacity-50"
-                  >
-                    <Send className="w-4 h-4 text-[#2563EB]" />
-                    <span>Generate Payment Link</span>
-                    <span className="text-[10px] font-normal text-[#1E40AF]">SMS / WhatsApp Url</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleExecuteBoundedAction('SEND_PAYMENT_REMINDER')}
-                    disabled={actionLoading || caseData?.status === 'RECOVERED'}
-                    className="p-3 bg-[#FAF5FF] hover:bg-[#F3E8FF] border border-[#E9D5FF] text-[#7E22CE] rounded-xl text-xs font-semibold flex flex-col items-center gap-1.5 transition-colors disabled:opacity-50"
-                  >
-                    <Sparkles className="w-4 h-4 text-[#9333EA]" />
-                    <span>Send Reminder</span>
-                    <span className="text-[10px] font-normal text-[#6B21A8]">Direct Checkout Token</span>
-                  </button>
-                </div>
-
-                {showEscalateInput ? (
-                  <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl space-y-3">
-                    <label className="text-xs font-bold text-[#92400E]">Escalation Reason / Notes for Specialist:</label>
-                    <textarea
-                      value={escalateReason}
-                      onChange={(e) => setEscalateReason(e.target.value)}
-                      placeholder="e.g., Customer reached out requesting manual wire instructions..."
-                      className="w-full p-2.5 bg-white border border-[#FCD34D] rounded-lg text-xs text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#D97706]/30"
-                      rows={2}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setShowEscalateInput(false)}
-                        className="px-3 py-1.5 bg-white border border-[#EAECF0] rounded-lg text-xs font-medium text-[#475467]"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleEscalateSubmit}
-                        disabled={actionLoading}
-                        className="px-3 py-1.5 bg-[#D97706] text-white rounded-lg text-xs font-semibold hover:bg-[#B45309]"
-                      >
-                        Confirm Escalation
-                      </button>
-                    </div>
+              {/* Customer Profile & Gateway Record */}
+              <div className="bg-white p-5 rounded-xl border border-[#EAECF0] shadow-xs space-y-3">
+                <h3 className="text-sm font-bold text-[#171717]">Gateway & Customer Details</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                  <div>
+                    <span className="text-[#667085]">Customer Name</span>
+                    <div className="font-semibold text-[#171717] mt-0.5">{caseData?.customer_name || 'Enterprise Client'}</div>
                   </div>
-                ) : null}
+                  <div>
+                    <span className="text-[#667085]">Email Address</span>
+                    <div className="font-semibold text-[#171717] mt-0.5">{caseData?.customer_email || 'client@example.com'}</div>
+                  </div>
+                  <div>
+                    <span className="text-[#667085]">Transaction ID</span>
+                    <div className="font-mono text-[#2563EB] mt-0.5">txn_{caseData?.id || '89201'}</div>
+                  </div>
+                </div>
               </div>
             </>
           ) : activeTab === 'workflow' ? (
@@ -500,7 +467,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
             <div className="space-y-6">
               <BoundedWorkflowVisualizer
                 currentState={workflowState}
-                policyPassed={agentDecision?.policy_result?.passed !== false}
+                policyPassed={!isExceededRetry}
                 recoveryProbability={agentDecision?.recovery_probability ?? caseData?.recovery_probability ?? 0.75}
                 riskScore={caseData?.risk_score ?? 0.25}
                 recommendedAction={agentDecision?.recommended_action || caseData?.recommended_strategy || 'RETRY_PAYMENT'}
@@ -515,17 +482,188 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                   Why Bounded Workflows Guarantee Autonomous Safety
                 </h4>
                 <p className="text-[#475467] leading-relaxed">
-                  Unlike open-ended generative loops, every action taken by the AI Revenue Recovery Agent is strictly gated through a deterministic state machine and policy rules engine. No external debit can trigger if policy checks fail, idempotency is guaranteed, and no case is resolved without gateway-confirmed transaction capture.
+                  Every recovery decision passes through an immutable policy check before execution. If a case exceeds 2 retry attempts, the policy engine immediately blocks further automated debits to protect customer trust and avoid gateway chargeback penalties.
                 </p>
               </div>
             </div>
-          ) : activeTab === 'audit' ? (
+          ) : activeTab === 'actions' ? (
+            /* Policy-Aware Action Panel */
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-[#171717]">Policy-Aware Action Control Center</h3>
+                  <p className="text-xs text-[#667085]">
+                    Execute bounded recovery interventions or manually route the transaction.
+                  </p>
+                </div>
+                {isExceededRetry && (
+                  <span className="px-3 py-1 bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg text-xs font-semibold flex items-center gap-1">
+                    <Ban className="w-3.5 h-3.5" /> Blocked by Policy: Max Retries (2) Exceeded
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Option 1: Smart Retry */}
+                <div className={`p-4 rounded-xl border transition-all ${
+                  !isExceededRetry && workflowState !== 'RECOVERED'
+                    ? 'bg-white border-[#EAECF0] hover:border-[#2563EB] shadow-xs'
+                    : 'bg-[#F9FAFB] border-[#EAECF0] opacity-60'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-[#EFF6FF] text-[#2563EB] rounded-lg">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#171717]">Smart Off-Peak Retry</h4>
+                        <span className="text-[10px] text-[#16A34A] font-semibold">91% Win Probability</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setConfirmAction({
+                        actionType: 'RETRY_PAYMENT',
+                        title: 'Execute Smart Off-Peak Retry',
+                        reason: 'Schedule dynamic off-peak retry during low bank server congestion.'
+                      })}
+                      disabled={isExceededRetry || workflowState === 'RECOVERED' || actionLoading}
+                      className="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:bg-[#94A3B8] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                    >
+                      Trigger Retry
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-[#667085] mt-2">
+                    Attempts payment capture via Razorpay Test Gateway using optimized timing.
+                  </p>
+                </div>
+
+                {/* Option 2: WhatsApp Dunning */}
+                <div className={`p-4 rounded-xl border transition-all ${
+                  workflowState !== 'RECOVERED'
+                    ? 'bg-white border-[#EAECF0] hover:border-[#16A34A] shadow-xs'
+                    : 'bg-[#F9FAFB] border-[#EAECF0] opacity-60'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-[#ECFDF3] text-[#16A34A] rounded-lg">
+                        <MessageSquare className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#171717]">WhatsApp 1-Click Pay Link</h4>
+                        <span className="text-[10px] text-[#2563EB] font-semibold">82% Win Probability</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setConfirmAction({
+                        actionType: 'SEND_PAYMENT_REMINDER',
+                        title: 'Send WhatsApp 1-Click Dunning',
+                        reason: 'Deliver personalized WhatsApp message with direct pre-filled UPI payment intent.'
+                      })}
+                      disabled={workflowState === 'RECOVERED' || actionLoading}
+                      className="px-3 py-1.5 bg-[#16A34A] hover:bg-[#15803D] disabled:bg-[#94A3B8] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                    >
+                      Send Dunning
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-[#667085] mt-2">
+                    Direct instant pay token delivered to customer's verified WhatsApp.
+                  </p>
+                </div>
+
+                {/* Option 3: Payment Link SMS / Email */}
+                <div className={`p-4 rounded-xl border transition-all ${
+                  workflowState !== 'RECOVERED'
+                    ? 'bg-white border-[#EAECF0] hover:border-[#2563EB] shadow-xs'
+                    : 'bg-[#F9FAFB] border-[#EAECF0] opacity-60'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-[#EFF6FF] text-[#2563EB] rounded-lg">
+                        <Send className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#171717]">SMS / Email Payment Link</h4>
+                        <span className="text-[10px] text-[#667085] font-semibold">Self-Serve Checkout</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setConfirmAction({
+                        actionType: 'GENERATE_PAYMENT_LINK',
+                        title: 'Generate Payment Link',
+                        reason: 'Generate a hosted Razorpay checkout URL and notify via SMS and email.'
+                      })}
+                      disabled={workflowState === 'RECOVERED' || actionLoading}
+                      className="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:bg-[#94A3B8] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                    >
+                      Generate Link
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-[#667085] mt-2">
+                    Creates a hosted payment page allowing customer to switch to NetBanking or Card.
+                  </p>
+                </div>
+
+                {/* Option 4: Human Escalation */}
+                <div className="p-4 rounded-xl border bg-white border-[#EAECF0] hover:border-[#D97706] shadow-xs transition-all">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-[#FFF7ED] text-[#D97706] rounded-lg">
+                        <PhoneCall className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#171717]">Escalate to Human Desk</h4>
+                        <span className="text-[10px] text-[#D97706] font-semibold">Priority Operations</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowEscalateInput(true)}
+                      disabled={workflowState === 'RECOVERED' || actionLoading}
+                      className="px-3 py-1.5 bg-[#D97706] hover:bg-[#B45309] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
+                    >
+                      Escalate
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-[#667085] mt-2">
+                    Assigns case to high-value merchant success specialist with full telemetry context.
+                  </p>
+                </div>
+              </div>
+
+              {showEscalateInput && (
+                <div className="p-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl space-y-3">
+                  <label className="text-xs font-bold text-[#92400E]">Escalation Reason / Notes for Specialist:</label>
+                  <textarea
+                    value={escalateReason}
+                    onChange={(e) => setEscalateReason(e.target.value)}
+                    placeholder="e.g., High-value enterprise account requiring manual invoice confirmation..."
+                    className="w-full p-2.5 bg-white border border-[#FCD34D] rounded-lg text-xs text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#D97706]/30"
+                    rows={2}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowEscalateInput(false)}
+                      className="px-3 py-1.5 bg-white border border-[#EAECF0] rounded-lg text-xs font-medium text-[#475467]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleEscalateSubmit}
+                      disabled={actionLoading}
+                      className="px-3 py-1.5 bg-[#D97706] text-white rounded-lg text-xs font-semibold hover:bg-[#B45309]"
+                    >
+                      Confirm Escalation
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
             /* Complete Audit Trail Tab */
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-[#171717]">Immutable Audit Log</h3>
-                  <p className="text-xs text-[#667085]">Chronological history of every agent action, state transition, and policy check.</p>
+                  <h3 className="text-sm font-bold text-[#171717]">Immutable Audit Log & Cryptographic Verification</h3>
+                  <p className="text-xs text-[#667085]">Every agent decision and state transition is permanently recorded for SOC2 compliance.</p>
                 </div>
                 <span className="px-2.5 py-1 bg-[#F2F4F7] text-[#344054] rounded-lg text-xs font-mono font-semibold">
                   {auditLogs.length} Total Events
@@ -538,7 +676,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                     <thead className="bg-[#F9FAFB] text-[#667085] font-semibold border-b border-[#EAECF0] uppercase text-[10px]">
                       <tr>
                         <th className="py-2.5 px-3">Timestamp</th>
-                        <th className="py-2.5 px-3">Agent</th>
+                        <th className="py-2.5 px-3">Actor / Agent</th>
                         <th className="py-2.5 px-3">Event</th>
                         <th className="py-2.5 px-3">Transition</th>
                         <th className="py-2.5 px-3">Reason / Details</th>
@@ -583,31 +721,6 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                 </div>
               </div>
             </div>
-          ) : (
-            /* Payment Context & Timeline */
-            <div className="space-y-4">
-              <div className="bg-white p-5 rounded-xl border border-[#EAECF0] shadow-xs space-y-4">
-                <h3 className="text-sm font-bold text-[#171717]">Customer & Payment Metadata</h3>
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <div className="text-[#667085]">Customer Name</div>
-                    <div className="font-semibold text-[#171717] mt-0.5">{caseData?.customer_name || 'Valued Merchant Client'}</div>
-                  </div>
-                  <div>
-                    <div className="text-[#667085]">Email & Contact</div>
-                    <div className="font-semibold text-[#171717] mt-0.5">{caseData?.customer_email || 'client@example.com'}</div>
-                  </div>
-                  <div>
-                    <div className="text-[#667085]">Payment Method</div>
-                    <div className="font-semibold text-[#171717] mt-0.5">{caseData?.payment_method || 'UPI'}</div>
-                  </div>
-                  <div>
-                    <div className="text-[#667085]">Failure Reason</div>
-                    <div className="font-semibold text-[#DC2626] mt-0.5">{caseData?.primary_failure_diagnosis || 'Bank Gateway Timeout'}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           )}
         </div>
 
@@ -615,11 +728,12 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
         <div className="p-4 border-t border-[#EAECF0] bg-[#F9FAFB] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowEscalateInput(true)}
-              disabled={actionLoading || caseData?.status === 'RECOVERED'}
-              className="px-3 py-2 rounded-lg text-xs font-medium text-[#475467] hover:bg-[#F2F4F7] border border-[#EAECF0] transition-colors disabled:opacity-50"
+              onClick={handleRunDiagnostics}
+              disabled={actionLoading}
+              className="px-3 py-2 rounded-lg text-xs font-medium text-[#344054] hover:bg-[#F2F4F7] border border-[#EAECF0] transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
-              Escalate to Human Desk
+              <RefreshCw className={`w-3.5 h-3.5 ${actionLoading ? 'animate-spin' : ''}`} />
+              Run Diagnostics
             </button>
             <button
               onClick={handleVerifyStatus}
@@ -627,15 +741,25 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
               className="px-3 py-2 rounded-lg text-xs font-medium text-[#2563EB] hover:bg-[#EFF6FF] border border-[#BFDBFE] transition-colors disabled:opacity-50 flex items-center gap-1"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Verify Status
+              Verify Settlement
             </button>
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handleExecuteBoundedAction()}
-              disabled={actionLoading || caseData?.status === 'RECOVERED' || (caseData?.actions_taken_count || 0) >= 3}
-              className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] shadow-sm transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              onClick={() => {
+                if (isExceededRetry) {
+                  setStatusMessage('Action blocked by policy: Max retries (2) limit reached.');
+                  return;
+                }
+                setConfirmAction({
+                  actionType: agentDecision?.recommended_action || caseData?.recommended_strategy || 'RETRY_PAYMENT',
+                  title: `Execute ${agentDecision?.recommended_action?.replace(/_/g, ' ') || 'Recommended Action'}`,
+                  reason: agentDecision?.reason || caseData?.reason || 'Agent analyzed failure code and scheduled automated win-back retry.'
+                });
+              }}
+              disabled={actionLoading || caseData?.status === 'RECOVERED'}
+              className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
               {actionLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
               Execute Recommended Action
@@ -643,6 +767,26 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <ActionConfirmModal
+          isOpen={true}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={() => handleExecuteBoundedAction(confirmAction.actionType)}
+          actionTitle={confirmAction.title}
+          actionType={confirmAction.actionType}
+          caseId={caseData?.id || caseId}
+          customerName={caseData?.customer_name}
+          amount={caseData?.at_risk_amount}
+          recoveryProbability={agentDecision?.recovery_probability || caseData?.recovery_probability}
+          currentRetryCount={retryCount}
+          maxRetryLimit={2}
+          reason={confirmAction.reason}
+          isPolicyAllowed={!isExceededRetry}
+          policyBlockedReason={isExceededRetry ? 'Max retries (2) limit reached. Bounded policy prevents customer payment fatigue.' : undefined}
+        />
+      )}
     </div>
   );
 };

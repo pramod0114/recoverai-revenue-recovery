@@ -52,8 +52,8 @@ export interface PaymentRecord {
   invoice_id: string | null;
   amount: number;
   currency: string;
-  payment_method: 'CARD_CREDIT' | 'CARD_DEBIT' | 'UPI' | 'NETBANKING' | 'WALLET' | 'AUTO_DEBIT';
-  payment_status: 'SUCCESSFUL' | 'FAILED' | 'PENDING' | 'RECOVERED' | 'ABANDONED' | 'REFUNDED';
+  payment_method: 'CARD_CREDIT' | 'CARD_DEBIT' | 'UPI' | 'NETBANKING' | 'WALLET' | 'AUTO_DEBIT' | string;
+  payment_status: 'SUCCESSFUL' | 'FAILED' | 'PENDING' | 'RECOVERED' | 'ABANDONED' | 'REFUNDED' | string;
   failure_code: string | null;
   failure_reason: string | null;
   failure_category:
@@ -65,11 +65,13 @@ export interface PaymentRecord {
     | 'FRAUD_SUSPICION'
     | 'GATEWAY_ERROR'
     | 'LIMIT_EXCEEDED'
-    | 'NONE';
+    | 'NONE'
+    | string;
   retry_count: number;
-  checkout_status: 'COMPLETED' | 'DROPPED' | 'EXPIRED' | 'SESSION_TIMEOUT';
-  recovery_status: 'NOT_APPLICABLE' | 'AT_RISK' | 'RECOVERING' | 'RECOVERED' | 'UNRECOVERABLE' | 'EXPIRED';
+  checkout_status: 'COMPLETED' | 'DROPPED' | 'EXPIRED' | 'SESSION_TIMEOUT' | string;
+  recovery_status: 'NOT_APPLICABLE' | 'AT_RISK' | 'RECOVERING' | 'RECOVERED' | 'UNRECOVERABLE' | 'EXPIRED' | string;
   recovered_amount: number;
+  recovery_probability?: number;
   customer_age_days: number;
   previous_successful_payments: number;
   previous_failed_payments: number;
@@ -86,13 +88,15 @@ export interface RecoveryCaseRecord {
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;
+  customer_ltv?: number;
   transaction_id?: string;
   payment_method?: string;
   at_risk_amount: number;
   currency: string;
   ml_recovery_probability: number;
   recovery_probability?: number;
-  risk_level?: 'HIGH' | 'MEDIUM' | 'LOW';
+  risk_score?: number;
+  risk_level?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | string;
   primary_failure_diagnosis: string;
   recommended_strategy:
     | 'SMART_RETRY_OFFPEAK'
@@ -103,8 +107,15 @@ export interface RecoveryCaseRecord {
     | 'ONE_CLICK_MANDATE_UPDATE'
     | 'MANUAL_INTERVENTION'
     | string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'RECOVERED' | 'FAILED' | 'DISMISSED' | 'UNRECOVERED';
+  recommended_action?: string;
+  reason?: string;
+  reasoning?: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RECOVERED' | 'FAILED' | 'DISMISSED' | 'UNRECOVERED' | 'ESCALATED' | string;
+  workflow_state?: string;
   actions_taken_count: number;
+  current_retry_count?: number;
+  executed_action?: string;
+  result?: string;
   recovered_amount: number;
   recovered_at: string | null;
   closed_at: string | null;

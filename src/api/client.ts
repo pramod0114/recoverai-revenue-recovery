@@ -57,7 +57,12 @@ export const api = {
 
   // Dashboard
   getKpis: () => request<any>('/dashboard/kpis'),
-  getTrend: () => request<any[]>('/dashboard/trend'),
+  getTrend: (params?: { timeframe?: string; days?: number }) => {
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return request<any[]>(`/dashboard/trend${query}`);
+  },
+  getFunnel: () => request<any>('/dashboard/funnel'),
+  globalSearch: (q: string) => request<any>(`/dashboard/search?q=${encodeURIComponent(q)}`),
   getFailureBreakdown: () => request<any[]>('/dashboard/failure-breakdown'),
   getInterventionsBreakdown: () => request<any>('/dashboard/interventions-breakdown'),
   getRecentActivity: () => request<any[]>('/dashboard/recent-activity'),
@@ -105,6 +110,7 @@ export const api = {
     }),
   getRecoveryCaseAudit: (id: string) => request<any>(`/recovery/cases/${id}/audit`),
   diagnoseAllRecoveryCases: () => request<any>('/recovery/diagnose-all', { method: 'POST' }),
+  runDiagnostics: () => request<any>('/recovery/run-diagnostics', { method: 'POST' }),
   triggerRecoveryAction: (id: string, actionData: { actionType: string; channel?: string }) =>
     request<any>(`/recovery/cases/${id}/action`, {
       method: 'POST',

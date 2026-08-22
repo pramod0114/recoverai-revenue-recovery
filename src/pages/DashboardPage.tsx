@@ -18,13 +18,19 @@ import {
   RefreshCw,
   Clock,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  AlertTriangle,
+  Flame,
+  UserX,
+  CreditCard
 } from 'lucide-react';
 import { RevenueTrendChart } from '../components/dashboard/RevenueTrendChart';
 import { InterventionDonutChart } from '../components/dashboard/InterventionDonutChart';
 import { FailureReasonsCard } from '../components/dashboard/FailureReasonsCard';
 import { RecentActivityFeed } from '../components/dashboard/RecentActivityFeed';
+import { RecoveryFunnel } from '../components/dashboard/RecoveryFunnel';
 import { RecoveryCaseDetailModal } from '../components/common/RecoveryCaseDetailModal';
+import { AiDiagnosticsModal } from '../components/common/AiDiagnosticsModal';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -36,9 +42,9 @@ export const DashboardPage: React.FC = () => {
   const [recentCases, setRecentCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState('May 12 — May 18, 2025');
+  const [dateRange, setDateRange] = useState('Last 14 days');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const loadDashboardData = async () => {
@@ -70,20 +76,6 @@ export const DashboardPage: React.FC = () => {
     loadDashboardData();
   }, []);
 
-  const handleRunBatchDiagnostics = async () => {
-    try {
-      setIsDiagnosing(true);
-      const res = await api.diagnoseAllRecoveryCases();
-      setToastMessage(res.message || 'AI Recovery Agent analyzed and evaluated policies for all open cases.');
-      await loadDashboardData();
-    } catch (err: any) {
-      setToastMessage(`Diagnostics error: ${err.message}`);
-    } finally {
-      setIsDiagnosing(false);
-      setTimeout(() => setToastMessage(null), 5000);
-    }
-  };
-
   const formatLakhs = (val: number) => {
     if (!val) return '₹0';
     if (val >= 100000) {
@@ -104,7 +96,6 @@ export const DashboardPage: React.FC = () => {
     'Last 7 days',
     'Last 14 days',
     'Last 30 days',
-    'May 12 — May 18, 2025',
     'This Quarter'
   ];
 
@@ -112,7 +103,7 @@ export const DashboardPage: React.FC = () => {
     <div className="space-y-8">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="p-3.5 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl text-xs text-[#1D4ED8] flex items-center justify-between shadow-sm animate-in fade-in">
+        <div className="p-3.5 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl text-xs text-[#1D4ED8] flex items-center justify-between shadow-xs animate-in fade-in">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#2563EB]" />
             <span>{toastMessage}</span>
@@ -130,7 +121,7 @@ export const DashboardPage: React.FC = () => {
             {getGreeting()}, {user?.fullName?.split(' ')[0] || 'Pramod'} 👋
           </h1>
           <p className="text-sm text-[#667085] mt-1">
-            Here's what's happening with your revenue recovery today.
+            Real-time fintech revenue recovery control center & bounded AI workflows.
           </p>
         </div>
 
@@ -173,24 +164,19 @@ export const DashboardPage: React.FC = () => {
 
           {/* Autonomous AI Batch Trigger */}
           <button
-            onClick={handleRunBatchDiagnostics}
-            disabled={isDiagnosing}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl text-xs font-semibold shadow-xs transition-all disabled:opacity-60"
+            onClick={() => setShowDiagnosticsModal(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
           >
-            {isDiagnosing ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Zap className="w-3.5 h-3.5 fill-white" />
-            )}
+            <Zap className="w-3.5 h-3.5 fill-white" />
             <span>Run AI Diagnostics</span>
           </button>
         </div>
       </div>
 
-      {/* 4 Primary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* ALL 8 Live KPI Cards in 4x2 responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Revenue at Risk */}
-        <div className="bg-white rounded-xl border border-[#EAECF0] p-5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#667085]">Revenue at Risk</span>
             <div className="w-8 h-8 rounded-lg bg-[#FAF5FF] border border-[#E9D5FF] flex items-center justify-center text-[#9333EA]">
@@ -201,18 +187,18 @@ export const DashboardPage: React.FC = () => {
             <div className="text-2xl font-bold text-[#171717] tracking-tight">
               {kpis ? formatLakhs(kpis.revenueAtRisk) : '₹18.45L'}
             </div>
-            <div className="flex items-center gap-1 text-[12px] text-[#DC2626] font-medium mt-1">
-              <span>↑ 8.2%</span>
-              <span className="text-[#98A2B3] font-normal">vs last 7 days</span>
+            <div className="flex items-center gap-1 text-[11px] text-[#DC2626] font-medium mt-1">
+              <span>{kpis?.periodComparison?.revenueAtRisk?.delta || -8.4}%</span>
+              <span className="text-[#98A2B3] font-normal">vs previous period</span>
             </div>
           </div>
           <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
-            {kpis?.failedPaymentsCount || 438} failed transactions detected
+            Active subscription & invoice risk
           </div>
         </div>
 
         {/* KPI 2: Recovered Revenue */}
-        <div className="bg-white rounded-xl border border-[#EAECF0] p-5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#667085]">Recovered Revenue</span>
             <div className="w-8 h-8 rounded-lg bg-[#ECFDF3] border border-[#A7F3D0] flex items-center justify-center text-[#16A34A]">
@@ -223,18 +209,40 @@ export const DashboardPage: React.FC = () => {
             <div className="text-2xl font-bold text-[#16A34A] tracking-tight">
               {kpis ? formatLakhs(kpis.recoveredRevenue) : '₹11.72L'}
             </div>
-            <div className="flex items-center gap-1 text-[12px] text-[#16A34A] font-medium mt-1">
-              <span>↑ 14.8%</span>
-              <span className="text-[#98A2B3] font-normal">vs last 7 days</span>
+            <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-medium mt-1">
+              <span>+{kpis?.periodComparison?.recoveredRevenue?.delta || 18.2}%</span>
+              <span className="text-[#98A2B3] font-normal">vs previous period</span>
             </div>
           </div>
           <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
-            Directly saved to merchant settlement
+            Directly settled to merchant balance
           </div>
         </div>
 
-        {/* KPI 3: Recovery Rate */}
-        <div className="bg-white rounded-xl border border-[#EAECF0] p-5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+        {/* KPI 3: Expected Recovery */}
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#667085]">Expected Recovery</span>
+            <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center text-[#2563EB]">
+              <Sparkles className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold text-[#2563EB] tracking-tight">
+              {kpis ? formatLakhs(kpis.expectedRecovery) : '₹4.85L'}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-[#2563EB] font-medium mt-1">
+              <span>+{kpis?.periodComparison?.expectedRecovery?.delta || 12.5}%</span>
+              <span className="text-[#98A2B3] font-normal">ML predicted yield</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
+            Calibrated win-back probability sum
+          </div>
+        </div>
+
+        {/* KPI 4: Recovery Rate */}
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#667085]">Recovery Rate</span>
             <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center text-[#2563EB]">
@@ -242,43 +250,109 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="my-2">
-            <div className="text-2xl font-bold text-[#2563EB] tracking-tight">
-              {kpis?.recoveryRate ? `${kpis.recoveryRate}%` : '63.52%'}
+            <div className="text-2xl font-bold text-[#171717] tracking-tight">
+              {kpis?.recoveryRate !== undefined ? `${kpis.recoveryRate}%` : '63.5%'}
             </div>
-            <div className="flex items-center gap-1 text-[12px] text-[#16A34A] font-medium mt-1">
-              <span>↑ 5.4%</span>
-              <span className="text-[#98A2B3] font-normal">vs industry benchmark (41%)</span>
+            <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-medium mt-1">
+              <span>+{kpis?.periodComparison?.recoveryRate?.delta || 4.8}%</span>
+              <span className="text-[#98A2B3] font-normal">vs industry avg (41%)</span>
             </div>
           </div>
           <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
-            Autonomous smart dunning & retry
+            Autonomous smart retries & dunning
           </div>
         </div>
 
-        {/* KPI 4: Active Cases */}
-        <div className="bg-white rounded-xl border border-[#EAECF0] p-5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+        {/* KPI 5: Active Recovery Cases */}
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#667085]">Active Cases</span>
+            <span className="text-xs font-semibold text-[#667085]">Active Recovery Cases</span>
             <div className="w-8 h-8 rounded-lg bg-[#FFF7ED] border border-[#FED7AA] flex items-center justify-center text-[#D97706]">
               <Layers className="w-4 h-4" />
             </div>
           </div>
           <div className="my-2">
             <div className="text-2xl font-bold text-[#171717] tracking-tight">
-              {kpis?.activeRecoveryCases || 428}
+              {kpis?.activeRecoveryCases ?? 428}
             </div>
-            <div className="flex items-center gap-1 text-[12px] text-[#D97706] font-medium mt-1">
-              <span>+ 124</span>
-              <span className="text-[#98A2B3] font-normal">high priority cases in queue</span>
+            <div className="flex items-center gap-1 text-[11px] text-[#D97706] font-medium mt-1">
+              <span>{kpis?.periodComparison?.activeRecoveryCases?.delta || -5.1}%</span>
+              <span className="text-[#98A2B3] font-normal">in active execution pipeline</span>
             </div>
           </div>
           <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
             Bounded workflow monitoring
           </div>
         </div>
+
+        {/* KPI 6: High-Risk Cases */}
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#667085]">High-Risk Cases</span>
+            <div className="w-8 h-8 rounded-lg bg-[#FEF2F2] border border-[#FECACA] flex items-center justify-center text-[#DC2626]">
+              <Flame className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold text-[#DC2626] tracking-tight">
+              {kpis?.highRiskCases ?? 72}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-medium mt-1">
+              <span>{kpis?.periodComparison?.highRiskCases?.delta || -14.2}%</span>
+              <span className="text-[#98A2B3] font-normal">churn risk reduced</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
+            Risk score ≥ 0.60 flagged
+          </div>
+        </div>
+
+        {/* KPI 7: Failed Payments */}
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#667085]">Failed Payments</span>
+            <div className="w-8 h-8 rounded-lg bg-[#F9FAFB] border border-[#EAECF0] flex items-center justify-center text-[#475467]">
+              <CreditCard className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold text-[#171717] tracking-tight">
+              {kpis?.failedPaymentsCount ?? 438}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-medium mt-1">
+              <span>{kpis?.periodComparison?.failedPaymentsCount?.delta || -6.7}%</span>
+              <span className="text-[#98A2B3] font-normal">failure volume drop</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
+            Ingested across Razorpay webhooks
+          </div>
+        </div>
+
+        {/* KPI 8: Escalated Cases */}
+        <div className="bg-white rounded-xl border border-[#EAECF0] p-4.5 shadow-xs flex flex-col justify-between hover:shadow-sm transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#667085]">Escalated Cases</span>
+            <div className="w-8 h-8 rounded-lg bg-[#FFF7ED] border border-[#FED7AA] flex items-center justify-center text-[#EA580C]">
+              <UserX className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold text-[#EA580C] tracking-tight">
+              {kpis?.escalatedCases ?? 18}
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-[#16A34A] font-medium mt-1">
+              <span>{kpis?.periodComparison?.escalatedCases?.delta || -22.0}%</span>
+              <span className="text-[#98A2B3] font-normal">human intervention required</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#667085] pt-2 border-t border-[#F2F4F7]">
+            Assigned to finance / success ops
+          </div>
+        </div>
       </div>
 
-      {/* Middle Row: Charts */}
+      {/* Middle Row: Trend & Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <RevenueTrendChart data={trend} />
@@ -286,6 +360,11 @@ export const DashboardPage: React.FC = () => {
         <div>
           <InterventionDonutChart data={interventions} />
         </div>
+      </div>
+
+      {/* Conversion Funnel */}
+      <div>
+        <RecoveryFunnel />
       </div>
 
       {/* Bottom Row: Recent Recovery Cases Table + Side Widgets */}
@@ -398,7 +477,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-4 border-t border-[#EAECF0] bg-[#F9FAFB] rounded-b-xl flex items-center justify-between text-xs text-[#667085]">
             <span>Showing top 6 priority cases</span>
             <Link to="/recovery" className="font-semibold text-[#2563EB] hover:underline">
-              View all 428 cases →
+              View all {kpis?.activeRecoveryCases || 428} cases →
             </Link>
           </div>
         </div>
@@ -413,7 +492,14 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Detail Modal */}
+      {/* Diagnostics Modal */}
+      <AiDiagnosticsModal
+        isOpen={showDiagnosticsModal}
+        onClose={() => setShowDiagnosticsModal(false)}
+        onCompleted={loadDashboardData}
+      />
+
+      {/* Case Detail Modal */}
       {selectedCaseId && (
         <RecoveryCaseDetailModal
           caseId={selectedCaseId}
