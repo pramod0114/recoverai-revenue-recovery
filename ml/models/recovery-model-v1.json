@@ -1,0 +1,4521 @@
+{
+  "metadata": {
+    "model_version": "recovery-model-v1",
+    "model_type": "TabularGradientBoostedEnsemble",
+    "trained_at": "2026-08-22T19:12:40.523Z",
+    "training_samples": 4000,
+    "test_samples": 1000,
+    "features_count": 38,
+    "feature_names": [
+      "amount",
+      "customer_age_days",
+      "previous_transactions",
+      "successful_transactions",
+      "failed_transactions",
+      "previous_recovery_count",
+      "retry_count",
+      "time_since_failure",
+      "days_since_last_payment",
+      "historical_success_rate",
+      "is_weekend",
+      "hour_of_day",
+      "payment_method_CARD_CREDIT",
+      "payment_method_CARD_DEBIT",
+      "payment_method_UPI",
+      "payment_method_NETBANKING",
+      "payment_method_AUTO_DEBIT",
+      "payment_method_WALLET",
+      "payment_method_OTHER",
+      "failure_reason_Insufficient Funds",
+      "failure_reason_Network Failure",
+      "failure_reason_Bank Decline",
+      "failure_reason_Expired Payment Method",
+      "failure_reason_Authentication Failure",
+      "failure_reason_Daily Limit Exceeded",
+      "failure_reason_Customer Dropout",
+      "failure_reason_Other",
+      "customer_segment_ENTERPRISE",
+      "customer_segment_PRO",
+      "customer_segment_GROWTH",
+      "customer_segment_STARTER",
+      "customer_segment_UNKNOWN",
+      "subscription_status_ACTIVE",
+      "subscription_status_PAST_DUE",
+      "subscription_status_UNPAID",
+      "subscription_status_CANCELLED",
+      "subscription_status_NONE",
+      "subscription_status_UNKNOWN"
+    ],
+    "metrics": {
+      "accuracy": 0.749,
+      "precision": 0.7379,
+      "recall": 0.9638,
+      "f1_score": 0.8358,
+      "roc_auc": 0.7982,
+      "confusion_matrix": {
+        "true_positives": 639,
+        "false_positives": 227,
+        "true_negatives": 110,
+        "false_negatives": 24
+      },
+      "false_positive_rate": 0.6736,
+      "false_negative_rate": 0.0362,
+      "estimated_false_positive_cost": 14075,
+      "test_sample_size": 1000,
+      "train_sample_size": 4000
+    },
+    "hyperparameters": {
+      "numTrees": 28,
+      "maxDepth": 4,
+      "learningRate": 0.1,
+      "minSamplesSplit": 8,
+      "seed": 42
+    },
+    "thresholds": {
+      "risk": {
+        "low_max": 0.29,
+        "medium_max": 0.59,
+        "high_max": 0.79
+      },
+      "recovery": {
+        "high_min": 0.7,
+        "medium_min": 0.4
+      }
+    },
+    "safety_limits": {
+      "max_retries": 2,
+      "min_recovery_probability_for_auto_retry": 0.7,
+      "max_amount_for_auto_retry": 100000
+    }
+  },
+  "preprocessorConfig": {
+    "categoricalMappings": {
+      "payment_method": [
+        "CARD_CREDIT",
+        "CARD_DEBIT",
+        "UPI",
+        "NETBANKING",
+        "AUTO_DEBIT",
+        "WALLET",
+        "OTHER"
+      ],
+      "failure_reason": [
+        "Insufficient Funds",
+        "Network Failure",
+        "Bank Decline",
+        "Expired Payment Method",
+        "Authentication Failure",
+        "Daily Limit Exceeded",
+        "Customer Dropout",
+        "Other"
+      ],
+      "customer_segment": [
+        "ENTERPRISE",
+        "PRO",
+        "GROWTH",
+        "STARTER",
+        "UNKNOWN"
+      ],
+      "subscription_status": [
+        "ACTIVE",
+        "PAST_DUE",
+        "UNPAID",
+        "CANCELLED",
+        "NONE",
+        "UNKNOWN"
+      ]
+    },
+    "numericalFeatures": [
+      "amount",
+      "customer_age_days",
+      "previous_transactions",
+      "successful_transactions",
+      "failed_transactions",
+      "previous_recovery_count",
+      "retry_count",
+      "time_since_failure",
+      "days_since_last_payment",
+      "historical_success_rate",
+      "is_weekend",
+      "hour_of_day"
+    ],
+    "scalerMeans": {
+      "amount": 7331.759,
+      "customer_age_days": 460.0845,
+      "previous_transactions": 52.48525,
+      "successful_transactions": 44.46075,
+      "failed_transactions": 8.0245,
+      "previous_recovery_count": 1.7875,
+      "retry_count": 0.67225,
+      "time_since_failure": 1431.809,
+      "days_since_last_payment": 22.787,
+      "historical_success_rate": 0.8256914499999827,
+      "is_weekend": 0.28375,
+      "hour_of_day": 11.36925
+    },
+    "scalerStds": {
+      "amount": 15401.780321684217,
+      "customer_age_days": 257.0468475973789,
+      "previous_transactions": 35.3554986167291,
+      "successful_transactions": 31.790217983485007,
+      "failed_transactions": 7.47076968926226,
+      "previous_recovery_count": 1.6501041633787958,
+      "retry_count": 0.9068240940226495,
+      "time_since_failure": 839.7332350330073,
+      "days_since_last_payment": 13.001139603896256,
+      "historical_success_rate": 0.11017681494714392,
+      "is_weekend": 0.45081696673927557,
+      "hour_of_day": 6.903796378623839
+    },
+    "medians": {
+      "amount": 2136,
+      "customer_age_days": 452,
+      "previous_transactions": 48,
+      "successful_transactions": 38,
+      "failed_transactions": 6,
+      "previous_recovery_count": 1,
+      "retry_count": 0,
+      "time_since_failure": 1440,
+      "days_since_last_payment": 23,
+      "historical_success_rate": 0.8333,
+      "is_weekend": 0,
+      "hour_of_day": 11
+    },
+    "modes": {},
+    "featureNames": [
+      "amount",
+      "customer_age_days",
+      "previous_transactions",
+      "successful_transactions",
+      "failed_transactions",
+      "previous_recovery_count",
+      "retry_count",
+      "time_since_failure",
+      "days_since_last_payment",
+      "historical_success_rate",
+      "is_weekend",
+      "hour_of_day",
+      "payment_method_CARD_CREDIT",
+      "payment_method_CARD_DEBIT",
+      "payment_method_UPI",
+      "payment_method_NETBANKING",
+      "payment_method_AUTO_DEBIT",
+      "payment_method_WALLET",
+      "payment_method_OTHER",
+      "failure_reason_Insufficient Funds",
+      "failure_reason_Network Failure",
+      "failure_reason_Bank Decline",
+      "failure_reason_Expired Payment Method",
+      "failure_reason_Authentication Failure",
+      "failure_reason_Daily Limit Exceeded",
+      "failure_reason_Customer Dropout",
+      "failure_reason_Other",
+      "customer_segment_ENTERPRISE",
+      "customer_segment_PRO",
+      "customer_segment_GROWTH",
+      "customer_segment_STARTER",
+      "customer_segment_UNKNOWN",
+      "subscription_status_ACTIVE",
+      "subscription_status_PAST_DUE",
+      "subscription_status_UNPAID",
+      "subscription_status_CANCELLED",
+      "subscription_status_NONE",
+      "subscription_status_UNKNOWN"
+    ]
+  },
+  "modelWeights": {
+    "version": "recovery-model-v1",
+    "type": "TabularGradientBoostedEnsemble",
+    "trees": [
+      {
+        "isLeaf": false,
+        "featureIndex": 9,
+        "featureName": "historical_success_rate",
+        "threshold": -1.4433597795471431,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 34,
+          "featureName": "subscription_status_UNPAID",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 21,
+            "featureName": "failure_reason_Bank Decline",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 33,
+              "featureName": "subscription_status_PAST_DUE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.010204071058927297
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.21118112820608764
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 10,
+              "featureName": "is_weekend",
+              "threshold": -0.2597136797671748,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.4401552002008685
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.034208388317823635
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 12,
+            "featureName": "payment_method_CARD_CREDIT",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": -0.1899486362739915,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.5241708725394107
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3353224192440417
+              }
+            },
+            "right": {
+              "isLeaf": true,
+              "probability": 0.03742202382358371
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 20,
+          "featureName": "failure_reason_Network Failure",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.06462443810561976
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.07814726567516253
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.36865492015915446
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.13017051540413574
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.9895278349559491,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.22803804232078795
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.10815266799675004
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -1.1155599430490375,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.46308846807031495
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.027575151333822732
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 30,
+          "featureName": "customer_segment_STARTER",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 24,
+              "featureName": "failure_reason_Daily Limit Exceeded",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.04843654671206201
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.08007433221170612
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": 1.464175917635948,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.12349461249407605
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.13826278702000014
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": 1.464175917635948,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.06966365084044833
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.36778336378728343
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 0.006777152270001974,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.2541387825341476
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.42873593778534724
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 4,
+          "featureName": "failed_transactions",
+          "threshold": 0.7106139734120998,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": -0.5782463239853238,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -1.1255268862809542,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.6006305016362731
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3390217795296316
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.8533259092705605,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.29381668655627774
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.08735348704380402
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 3,
+            "featureName": "successful_transactions",
+            "threshold": 0.6565725137266005,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": -0.11123772474458016,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.45927125867569885
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2570346373318531
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -0.9691280111927589,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.07480427527810707
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.5612467855034408
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 34,
+        "featureName": "subscription_status_UNPAID",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 21,
+          "featureName": "failure_reason_Bank Decline",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 28,
+            "featureName": "customer_segment_PRO",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 20,
+              "featureName": "failure_reason_Network Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.0218717391516913
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.13520054101334164
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": 0.7194849480181487,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.040788644006472495
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.12370043589941758
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": -0.6869998015126395,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 0.9368095467185809,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3494091861049866
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1132043829061962
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.8480832064129314,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.23834815907200127
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0943307675312119
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 6,
+          "featureName": "retry_count",
+          "threshold": 0.7290094492315304,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3121652090188585
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.13345416540680344
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 16,
+              "featureName": "payment_method_AUTO_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.10914312178498904
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.1349613315788417
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": 0.4475401655391158,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 1.0803924702972847,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.36991539019195213
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.008807920646402545
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": 0.16378669618662722,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3323571141640441
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.6382079310058781
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 34,
+          "featureName": "subscription_status_UNPAID",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 0.7290094492315304,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": -0.5363112018769278,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.03090456391901786
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.10764933528366587
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 17,
+              "featureName": "payment_method_WALLET",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.01137201922460101
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.16812122899413612
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 11,
+            "featureName": "hour_of_day",
+            "threshold": 1.129438969377738,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": -0.006157019172887024,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.14188867690232107
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.30492574643576514
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 0.4902836452853818,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.0411551782908399
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3458077437185523
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 5,
+          "featureName": "previous_recovery_count",
+          "threshold": 1.4418281702865494,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 2,
+            "featureName": "previous_transactions",
+            "threshold": 0.877225642783745,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -0.6869998015126395,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.29504458913388437
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.14119989189261317
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 32,
+              "featureName": "subscription_status_ACTIVE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.515690148079746
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.22257860227622123
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 11,
+            "featureName": "hour_of_day",
+            "threshold": -1.1157025657915942,
+            "left": {
+              "isLeaf": true,
+              "probability": 0.43137252498650375
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": 0.17918364533247377,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.26762155530350645
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2431016229562234
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 32,
+        "featureName": "subscription_status_ACTIVE",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 11,
+          "featureName": "hour_of_day",
+          "threshold": -1.0915612589618164,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.13637862634147496
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.32822877575653403
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 0.43179092315061274,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.10877585834107688
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.5226258219776696
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.041018289109875816
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.27885029960491564
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 3.3235491783547104,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.17243636500319384
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.7748491698507713
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 6,
+          "featureName": "retry_count",
+          "threshold": 0.7290094492315304,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": -1.0915612589618164,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.07794761619513399
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.0016103390472732694
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": 0.7089995423028908,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.1376163338229252
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.02859759610837873
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 2,
+            "featureName": "previous_transactions",
+            "threshold": -0.5228394655210256,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.5807053606738507,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1674700649222979
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.46041308115083596
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": 1.0375024565290725,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.09636917132814377
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.05612413080874381
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 34,
+        "featureName": "subscription_status_UNPAID",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 6,
+          "featureName": "retry_count",
+          "threshold": 0.7290094492315304,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": -0.5782463239853238,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": -0.5575318704762001,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.021687757719006502
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.09608480499169082
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 30,
+              "featureName": "customer_segment_STARTER",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.0674735901228295
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.011668648245328378
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 21,
+            "featureName": "failure_reason_Bank Decline",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 25,
+              "featureName": "failure_reason_Customer Dropout",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.030542589722124643
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.5190152968766604
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 15,
+              "featureName": "payment_method_NETBANKING",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1942004076480489
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3658880780271002
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 14,
+          "featureName": "payment_method_UPI",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 19,
+            "featureName": "failure_reason_Insufficient Funds",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.8480832064129314,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3163874000743168
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.13286647807780558
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 16,
+              "featureName": "payment_method_AUTO_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.07590545446378784
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.04380965001294307
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 8,
+            "featureName": "days_since_last_payment",
+            "threshold": 1.1829475826917206,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -1.114213769681935,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.621784834444013
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.30982161127591856
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 1.5034323089243329,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.4349569139281891
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2949698663527509
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 32,
+          "featureName": "subscription_status_ACTIVE",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 29,
+            "featureName": "customer_segment_GROWTH",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 4.9391849131166765,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0526257641333319
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3239247213154358
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 17,
+              "featureName": "payment_method_WALLET",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.15050512279075756
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.01946519557384061
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 22,
+            "featureName": "failure_reason_Expired Payment Method",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.9895278349559491,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.12051407573922339
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.05419455889127414
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.030675311310687084
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1460694275743546
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 2,
+          "featureName": "previous_transactions",
+          "threshold": -0.5228394655210256,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": 1.4418281702865494,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.6784022553326667,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.24271898726231708
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.013572310314709379
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 17,
+              "featureName": "payment_method_WALLET",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.01938877946387373
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.40499224500217934
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 0,
+            "featureName": "amount",
+            "threshold": 0.6281897805267482,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 10,
+              "featureName": "is_weekend",
+              "threshold": -0.2597136797671748,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.16204435747177215
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.00539273304256136
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 12,
+              "featureName": "payment_method_CARD_CREDIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.05792394180412517
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.46206678880161167
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 32,
+          "featureName": "subscription_status_ACTIVE",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 0.0121359969748005,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.08761393635701752
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.062315173700843884
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 14,
+              "featureName": "payment_method_UPI",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.10308472968782749
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3370791613655964
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 22,
+            "featureName": "failure_reason_Expired Payment Method",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 20,
+              "featureName": "failure_reason_Network Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.05479906538041727
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.10770970744493556
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -0.01783527027408205,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.06779045199005383
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.05682079969690208
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 5,
+          "featureName": "previous_recovery_count",
+          "threshold": 1.4418281702865494,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 27,
+            "featureName": "customer_segment_ENTERPRISE",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": 0.4105372733488215,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.12243290196765962
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.2410560183336005
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 15,
+              "featureName": "payment_method_NETBANKING",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.06266502555735129
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.270967954662657
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 3,
+            "featureName": "successful_transactions",
+            "threshold": -0.16128913206352813,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": -0.26932550956419116,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.42546456355325174
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.29646179830126856
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 15,
+              "featureName": "payment_method_NETBANKING",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.27055642144479075
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.5454209393803393
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 32,
+        "featureName": "subscription_status_ACTIVE",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 8,
+          "featureName": "days_since_last_payment",
+          "threshold": -0.5476699389643866,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 4,
+            "featureName": "failed_transactions",
+            "threshold": -0.1817528032332395,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 30,
+              "featureName": "customer_segment_STARTER",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.028701285303185314
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.14157057107020232
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 0.006777152270001974,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.032133064029670005
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3842462922147614
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 1.464175917635948,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": -1.0915612589618164,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.1097404378193551
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.028869599985988516
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 0.6771126962067716,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.2724516737896975
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.3085063721058631
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 21,
+          "featureName": "failure_reason_Bank Decline",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 0.7290094492315304,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.06601888875451585
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.02575573852199989
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 4,
+              "featureName": "failed_transactions",
+              "threshold": 1.781454105386507,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.04141568039534464
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2256932090089669
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": -0.561855813628068,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 4,
+              "featureName": "failed_transactions",
+              "threshold": 2.495347526702778,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.025102529871230437
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.43111476913704677
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.20442710871257694
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.027723814529507056
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 32,
+          "featureName": "subscription_status_ACTIVE",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 33,
+              "featureName": "subscription_status_PAST_DUE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.17838178512932873
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.00805651069203062
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": -0.006157019172887024,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.08522501226283592
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0954707929533428
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 11,
+            "featureName": "hour_of_day",
+            "threshold": -0.5363112018769278,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": -1.1117230571337844,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.08472030800961505
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.026905662823162077
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": 0.1899719593976168,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.09312199033521636
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.020431706843321497
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 27,
+          "featureName": "customer_segment_ENTERPRISE",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 33,
+            "featureName": "subscription_status_PAST_DUE",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 0.580436297374409,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1866669252362853
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.26489664161047594
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": 1.068218378218565,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.020005522491233226
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.33527128522876176
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 10,
+            "featureName": "is_weekend",
+            "threshold": -0.2597136797671748,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": 0.4293875260662877,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.07554786747369442
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1636112033182797
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.465365897806012,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.40681470074225146
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2033562029710236
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 32,
+        "featureName": "subscription_status_ACTIVE",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 12,
+          "featureName": "payment_method_CARD_CREDIT",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 21,
+            "featureName": "failure_reason_Bank Decline",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 0.5722345064911545,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0666949684915492
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1702977106772807
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": 0.1899719593976168,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.19662783116535584
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.4509277085814618
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -0.6111123379581247,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": -0.34318074723870584,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.22571051652725213
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.2635119133291036
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -0.15458361606337712,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.18078176288981193
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.06532906374782636
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 20,
+          "featureName": "failure_reason_Network Failure",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": 0.010349715406534399,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.005757178774950977
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.07342603578740206
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.029570176850890608
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.17633840336551715
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 11,
+            "featureName": "hour_of_day",
+            "threshold": 1.129438969377738,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.1153859879286663
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.04859108039506466
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": -0.006157019172887024,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.012907813141487694
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.17671364665867073
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 34,
+        "featureName": "subscription_status_UNPAID",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 13,
+          "featureName": "payment_method_CARD_DEBIT",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 1.464175917635948,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 17,
+              "featureName": "payment_method_WALLET",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.012260412489595834
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.04793995972669511
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": 0.877225642783745,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.15783054152637827
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.09924035243631062
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 25,
+            "featureName": "failure_reason_Customer Dropout",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 32,
+              "featureName": "subscription_status_ACTIVE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.11958937126414598
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.026033661921546054
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -1.1518697963717766,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.44262707334110873
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.24694329419202335
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 1,
+          "featureName": "customer_age_days",
+          "threshold": 0.5650675536034635,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 14,
+            "featureName": "payment_method_UPI",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 0.43179092315061274,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.2100076879213756
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.05982617353608929
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 23,
+              "featureName": "failure_reason_Authentication Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3731131969786034
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.18908219335557702
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 10,
+            "featureName": "is_weekend",
+            "threshold": -0.2597136797671748,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 1.0791415204191375,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.14596862048802584
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.010160777125776177
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -1.0553471108154429,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.2997562505599701
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.23397294406614108
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 34,
+        "featureName": "subscription_status_UNPAID",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 20,
+          "featureName": "failure_reason_Network Failure",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": 0.0121359969748005,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0016385405671929707
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.07649788104059779
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 23,
+              "featureName": "failure_reason_Authentication Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.040254732520927504
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.04088664706514304
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 1.464175917635948,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": -0.5476699389643866,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.026394775980539742
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.08418438357472159
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.03419230699232807
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.6051363888036878
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 8,
+          "featureName": "days_since_last_payment",
+          "threshold": 1.1444894155438072,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": 0.009397119717972524,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 14,
+              "featureName": "payment_method_UPI",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.10973128613196848
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3670910373057356
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.08611516738494213
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.14615511186612265
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": -0.5007252888474032,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.059289973167604725
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.40624668883743986
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 0.6023918970980433,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3167315588251881
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.6598564493178619
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 22,
+        "featureName": "failure_reason_Expired Payment Method",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 21,
+          "featureName": "failure_reason_Bank Decline",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0379817378910118
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.014565664585025785
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 0.01638317920501131,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.030994387799445525
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.10302123967521197
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 32,
+            "featureName": "subscription_status_ACTIVE",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.15179584271458685
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.38392291575867515
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 0.43179092315061274,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.09910940963064774
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.020004880497800717
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 11,
+          "featureName": "hour_of_day",
+          "threshold": -1.0915612589618164,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 12,
+            "featureName": "payment_method_CARD_CREDIT",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 34,
+              "featureName": "subscription_status_UNPAID",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.17022587632258648
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.2883927758409081
+              }
+            },
+            "right": {
+              "isLeaf": true,
+              "probability": -0.4658897950375478
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": 0.021067404816131452,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -0.28673410113678033,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.17596723428859531
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.08460199706567424
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 0.43179092315061274,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3350950507316638
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.14063745447628395
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 3,
+        "featureName": "successful_transactions",
+        "threshold": 0.1899719593976168,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 11,
+          "featureName": "hour_of_day",
+          "threshold": 0.018938855207960792,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.7302565186032138,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.07781092989229284
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.0031099202103592113
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.7585406622053303,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.009914387503410288
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.1209889998445225
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 0.7290094492315304,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -0.6869998015126395,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.006526999300237111
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.09690884139678689
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.36051184065343156,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.09385130145971236
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.01935116527889406
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 1,
+          "featureName": "customer_age_days",
+          "threshold": -0.3258206332794593,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 2,
+            "featureName": "previous_transactions",
+            "threshold": 0.9102238103195478,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.0543717875311578
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.15504697954588306
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.047101794503885845
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3129561146022767
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 3,
+            "featureName": "successful_transactions",
+            "threshold": 0.9763773880419715,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -1.4433597795471431,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.30437081815100164
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0663196298100809
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.029596190443660568
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0853517784532249
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 20,
+        "featureName": "failure_reason_Network Failure",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 21,
+          "featureName": "failure_reason_Bank Decline",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": 0.43179092315061274,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 4,
+              "featureName": "failed_transactions",
+              "threshold": 2.495347526702778,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.003476653444219951
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.24391984573074568
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 12,
+              "featureName": "payment_method_CARD_CREDIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.060185684155928475
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0360969781012953
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": 0.06936017652186388,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": -1.1117230571337844,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.2529548179599602
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.14423904034693796
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 10,
+              "featureName": "is_weekend",
+              "threshold": -0.2597136797671748,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.007435234985611557
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.11505474268802036
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 9,
+          "featureName": "historical_success_rate",
+          "threshold": -0.6869998015126395,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -1.1499246256580586,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": -0.1899486362739915,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.07761947209687588
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.2883650058005234
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -0.6571480448494548,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.2713633047587189
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.11668205440426759
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": 1.4418281702865494,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 32,
+              "featureName": "subscription_status_ACTIVE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.10782197153744424
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.030455081532448962
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 29,
+              "featureName": "customer_segment_GROWTH",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.004604750290167479
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.21561027186126566
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 34,
+        "featureName": "subscription_status_UNPAID",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 7,
+          "featureName": "time_since_failure",
+          "threshold": 0.0121359969748005,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": 0.7290094492315304,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": 0.5598804317002153,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.08737539542240699
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.0006891757756968958
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -1.1294964008771013,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.11200866503813695
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.03824036936206743
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 21,
+            "featureName": "failure_reason_Bank Decline",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": 1.464175917635948,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.025387923466210195
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.20114985742294517
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.08756323457214531
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.17197372659368115
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 3,
+          "featureName": "successful_transactions",
+          "threshold": 1.228027125208165,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -0.5592411189256401,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 0.3515334517774722,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1777334345774265
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.273596373226598
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 1.4418281702865494,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.026837152475537522
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.17754887055016721
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": 0.8559745536777476,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 4.273147191995297,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.5112219487249752
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.06489952468704367
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 23,
+              "featureName": "failure_reason_Authentication Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.051190486152666984
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2430793610462792
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 34,
+        "featureName": "subscription_status_UNPAID",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 24,
+          "featureName": "failure_reason_Daily Limit Exceeded",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 3,
+            "featureName": "successful_transactions",
+            "threshold": 0.1899719593976168,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -1.1557601377992133,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.051926822586329885
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.02258930476017244
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -1.6702677729574944,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.2944308951137655
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.004716090407035459
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -0.02172561170151832,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.9895278349559491,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.23742941795398265
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.17702720302876157
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": 0.6097037448297131,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3214936404424222
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.07606346744861833
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 5,
+          "featureName": "previous_recovery_count",
+          "threshold": 0.43179092315061274,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": 1.129438969377738,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.22275086895716087
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.02846320165602597
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 0.5646924287584747,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.10729895691057058
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.19984726472765243
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 4,
+            "featureName": "failed_transactions",
+            "threshold": 1.0675606840702356,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 0.9368095467185811,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.19698413585852032
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.07305492340001506
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3728354689895471
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.2115417841853567
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 11,
+          "featureName": "hour_of_day",
+          "threshold": 0.5741889122928492,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 25,
+            "featureName": "failure_reason_Customer Dropout",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -0.5825831674902582,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.00613317240115878
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.0555405636052584
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 17,
+              "featureName": "payment_method_WALLET",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0752144293586055
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.41195874562042256
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 34,
+            "featureName": "subscription_status_UNPAID",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": 0.7290094492315304,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.012500088769069863
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1333303290818586
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.09786175120130548
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3733241971296751
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 5,
+          "featureName": "previous_recovery_count",
+          "threshold": 0.43179092315061274,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 11,
+            "featureName": "hour_of_day",
+            "threshold": 0.018938855207960792,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 1.1444894155438072,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.06981703168321216
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.33334446043038407
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": 0.06936017652186388,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1508319798659786
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.028651175712183043
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 29,
+            "featureName": "customer_segment_GROWTH",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.23468697207033462,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.17759458628218944
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.034054514707715526
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 12,
+              "featureName": "payment_method_CARD_CREDIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.17480066744261888
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.17699591819138832
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 36,
+        "featureName": "subscription_status_NONE",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 34,
+          "featureName": "subscription_status_UNPAID",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 20,
+            "featureName": "failure_reason_Network Failure",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 3,
+              "featureName": "successful_transactions",
+              "threshold": -0.3290556235076574,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.01106342815548996
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.0228464179682582
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 33,
+              "featureName": "subscription_status_PAST_DUE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.05575862439754741
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.006743207994910844
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 4,
+            "featureName": "failed_transactions",
+            "threshold": 0.5767589569152989,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": 0.557286870748591,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.09719286003067168
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.021987366993426648
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": 0.018938855207960792,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.12692087401616353
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.06349054140548539
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 11,
+          "featureName": "hour_of_day",
+          "threshold": -0.5363112018769278,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": -0.0732277004173556,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 4,
+              "featureName": "failed_transactions",
+              "threshold": -0.49408117505910826,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.22249662335824252
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.6414941980369403
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -0.26056404589678595,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.4670329298658529
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.5068479224142435
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 19,
+            "featureName": "failure_reason_Insufficient Funds",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -1.1069308613173963,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.3532409722920811
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.07102596201466843
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": -0.42186198809230646,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.22897778481244993
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1546724024434042
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 21,
+        "featureName": "failure_reason_Bank Decline",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 34,
+          "featureName": "subscription_status_UNPAID",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 25,
+            "featureName": "failure_reason_Customer Dropout",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 13,
+              "featureName": "payment_method_CARD_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.032331897113209516
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.01622522274632712
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": -0.5782463239853238,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.4463326142385643
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.04468517694720769
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": 0.43179092315061274,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 16,
+              "featureName": "payment_method_AUTO_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.12451086949789308
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.05686988945120176
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -1.8245652084765331,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.33488136788062556
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.07710980613127208
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 0,
+          "featureName": "amount",
+          "threshold": 2.7705395161313278,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 5,
+            "featureName": "previous_recovery_count",
+            "threshold": 1.4418281702865494,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 0.06342823013072552,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.14337798468661808
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.01968391623518485
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": -0.23999802949985982,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.08478716616386753
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.14745915509007354
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 8,
+            "featureName": "days_since_last_payment",
+            "threshold": 1.0419343031493715,
+            "left": {
+              "isLeaf": true,
+              "probability": -0.6232415230046523
+            },
+            "right": {
+              "isLeaf": true,
+              "probability": 0.15478824353821807
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 11,
+        "featureName": "hour_of_day",
+        "threshold": -0.5363112018769278,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 25,
+          "featureName": "failure_reason_Customer Dropout",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": 1.1529744919074727,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 2.946071171792832,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.025945925883148202
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.22837341378443227
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": -1.4778221682382604,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.1287463812745459
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.00014183670796553727
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": -0.006157019172887024,
+            "left": {
+              "isLeaf": true,
+              "probability": 0.16249034389616465
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 0.0548413463529247,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.25847263346616195
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.5976462391918389
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 6,
+          "featureName": "retry_count",
+          "threshold": 1.464175917635948,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 11,
+            "featureName": "hour_of_day",
+            "threshold": 0.9604498215692936,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -0.011999758132927418,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.015432053079144402
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.047538661345576126
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.06647540445077832
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.050813519037973376
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 28,
+            "featureName": "customer_segment_PRO",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 0,
+              "featureName": "amount",
+              "threshold": 1.7914968545001768,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1515714817942347
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.38430840626249296
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": -0.4451148265699507,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.13072415282734604
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.08353390767792897
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 23,
+        "featureName": "failure_reason_Authentication Failure",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 16,
+          "featureName": "payment_method_AUTO_DEBIT",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 30,
+            "featureName": "customer_segment_STARTER",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 34,
+              "featureName": "subscription_status_UNPAID",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0027168527748928505
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.1322681933399333
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -0.5578862990319211,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.011581823907691116
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.09101456944204347
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 28,
+            "featureName": "customer_segment_PRO",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": 1.129438969377738,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.05874727067606284
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0868769031185583
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.0046426510516442724
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.24421491515129842
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 14,
+          "featureName": "payment_method_UPI",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 16,
+            "featureName": "payment_method_AUTO_DEBIT",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 27,
+              "featureName": "customer_segment_ENTERPRISE",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.038577527930398835
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.11786386666492576
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -1.0643963615002892,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.1775511998598667
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.1285147527703827
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": -2.1997197575816467,
+            "left": {
+              "isLeaf": true,
+              "probability": -0.38317692301058237
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.07268566738950205
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.1872355306976275
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 16,
+        "featureName": "payment_method_AUTO_DEBIT",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 20,
+          "featureName": "failure_reason_Network Failure",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 19,
+            "featureName": "failure_reason_Insufficient Funds",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": -1.155111747561307,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.024135168020399573
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.05425194136752986
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": 0.4105372733488215,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.021355165199430516
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.06577031439128815
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": -1.1189771871973115,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -0.6869998015126395,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.15566303572224946
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.06632975934012242
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 12,
+              "featureName": "payment_method_CARD_CREDIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.017539330242856463
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.06393672183673388
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 6,
+          "featureName": "retry_count",
+          "threshold": 1.464175917635948,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": -1.4433597795471431,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": 1.4418281702865494,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.11285797485951221
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.6544724247168101
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": -1.1117230571337844,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.1641332809246552
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.07711618364630365
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 3,
+            "featureName": "successful_transactions",
+            "threshold": -0.24517237778559275,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -1.2940543198831325,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.26015261833813663
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.5651971176679688
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": 0.5599290112430979,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.4754222127345003
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.02339765156974797
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 6,
+        "featureName": "retry_count",
+        "threshold": -0.006157019172887024,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 4,
+          "featureName": "failed_transactions",
+          "threshold": 3.387714303348118,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 21,
+            "featureName": "failure_reason_Bank Decline",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 4,
+              "featureName": "failed_transactions",
+              "threshold": -0.36022615856230733,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.0012051126314626599
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.04978738152257262
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 1,
+              "featureName": "customer_age_days",
+              "threshold": 1.1187928167752372,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.08943383666229555
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.12916531213956095
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 0,
+            "featureName": "amount",
+            "threshold": -0.42437252037228107,
+            "left": {
+              "isLeaf": true,
+              "probability": 0.1093396686717581
+            },
+            "right": {
+              "isLeaf": true,
+              "probability": -0.47027294176971585
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 10,
+          "featureName": "is_weekend",
+          "threshold": -0.2597136797671748,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": -0.6869998015126395,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": 0.8819396667174315,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.05644218592561301
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.3418424289180913
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 29,
+              "featureName": "customer_segment_GROWTH",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.05627014424926224
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.025360742468919003
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 9,
+            "featureName": "historical_success_rate",
+            "threshold": -2.1997197575816467,
+            "left": {
+              "isLeaf": true,
+              "probability": 0.5346468934427236
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 7,
+              "featureName": "time_since_failure",
+              "threshold": -1.1169924298992377,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.10720988735353872
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.052054340628166246
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 4,
+        "featureName": "failed_transactions",
+        "threshold": -0.1817528032332395,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 30,
+          "featureName": "customer_segment_STARTER",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 4,
+            "featureName": "failed_transactions",
+            "threshold": -0.9402645633817779,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 23,
+              "featureName": "failure_reason_Authentication Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.029094761722133478
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.0747252640408343
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 6,
+              "featureName": "retry_count",
+              "threshold": 2.9345088544447826,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.035368293038288104
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.3210696059609328
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": -0.5610619107088388,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 34,
+              "featureName": "subscription_status_UNPAID",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.14441149227305924
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.07806020554971319
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 19,
+              "featureName": "failure_reason_Insufficient Funds",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.039855978908386054
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.18295412418329582
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 3,
+          "featureName": "successful_transactions",
+          "threshold": 0.2057000679705041,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": -0.5499472698396268,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 1.0803924702972847,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.02002539128901119
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.20546053152254465
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 14,
+              "featureName": "payment_method_UPI",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.11400331041209343
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.018608217092233266
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 36,
+            "featureName": "subscription_status_NONE",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 34,
+              "featureName": "subscription_status_UNPAID",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.0017679937760890251
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.08002160577255152
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 4,
+              "featureName": "failed_transactions",
+              "threshold": 1.134488192318636,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.7442475389347554
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.04443460246510028
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 24,
+        "featureName": "failure_reason_Daily Limit Exceeded",
+        "threshold": 0.16666666666666666,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 6,
+          "featureName": "retry_count",
+          "threshold": -0.006157019172887024,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 21,
+            "featureName": "failure_reason_Bank Decline",
+            "threshold": 0.16666666666666666,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": 1.1444894155438072,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.04439763975393656
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.022323643815833325
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 16,
+              "featureName": "payment_method_AUTO_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.03076965545921447
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.15807068267471794
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": -0.5582832504915356,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 21,
+              "featureName": "failure_reason_Bank Decline",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.047357372252070686
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.06359224307124797
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 8,
+              "featureName": "days_since_last_payment",
+              "threshold": -0.5476699389643866,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.003797950878105097
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.0619406600733224
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 17,
+          "featureName": "payment_method_WALLET",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -0.6137058989097488,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 13,
+              "featureName": "payment_method_CARD_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.334709059030053
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.008421447456171209
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 29,
+              "featureName": "customer_segment_GROWTH",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.008027947218955762
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.2036448947183105
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 6,
+            "featureName": "retry_count",
+            "threshold": -0.1899486362739915,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 9,
+              "featureName": "historical_success_rate",
+              "threshold": -0.04711926009544942,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.545300751413572
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.18548129764285876
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 30,
+              "featureName": "customer_segment_STARTER",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.37151225178404557
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.2481046686420187
+              }
+            }
+          }
+        }
+      },
+      {
+        "isLeaf": false,
+        "featureIndex": 3,
+        "featureName": "successful_transactions",
+        "threshold": 0.1899719593976168,
+        "left": {
+          "isLeaf": false,
+          "featureIndex": 16,
+          "featureName": "payment_method_AUTO_DEBIT",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -1.1557601377992133,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 13,
+              "featureName": "payment_method_CARD_DEBIT",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.10170205323343685
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.02779991264012157
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 20,
+              "featureName": "failure_reason_Network Failure",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.007510849580026811
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.08459305649278345
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 1,
+            "featureName": "customer_age_days",
+            "threshold": -0.5981445332000037,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.05175588102525976
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.1529471081409393
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 11,
+              "featureName": "hour_of_day",
+              "threshold": 1.129438969377738,
+              "left": {
+                "isLeaf": true,
+                "probability": 0.1583100527770372
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.05847001202580571
+              }
+            }
+          }
+        },
+        "right": {
+          "isLeaf": false,
+          "featureIndex": 25,
+          "featureName": "failure_reason_Customer Dropout",
+          "threshold": 0.16666666666666666,
+          "left": {
+            "isLeaf": false,
+            "featureIndex": 8,
+            "featureName": "days_since_last_payment",
+            "threshold": -0.5476699389643866,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 2,
+              "featureName": "previous_transactions",
+              "threshold": 0.1889781484655751,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.34256385896043473
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": -0.013131467467805809
+              }
+            },
+            "right": {
+              "isLeaf": false,
+              "featureIndex": 28,
+              "featureName": "customer_segment_PRO",
+              "threshold": 0.16666666666666666,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.009806889403417932
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.055791537352427305
+              }
+            }
+          },
+          "right": {
+            "isLeaf": false,
+            "featureIndex": 7,
+            "featureName": "time_since_failure",
+            "threshold": 1.101370802157561,
+            "left": {
+              "isLeaf": false,
+              "featureIndex": 5,
+              "featureName": "previous_recovery_count",
+              "threshold": -0.5782463239853238,
+              "left": {
+                "isLeaf": true,
+                "probability": -0.4132955725186516
+              },
+              "right": {
+                "isLeaf": true,
+                "probability": 0.11427089192232727
+              }
+            },
+            "right": {
+              "isLeaf": true,
+              "probability": -0.5992176343607031
+            }
+          }
+        }
+      }
+    ],
+    "coefficients": [
+      0.08697503936984122,
+      0.0395246005541682,
+      0.1263176064995552,
+      0.1460068201243383,
+      -0.023500480441391913,
+      0.12817603352452148,
+      -0.3687398144238402,
+      -0.20472669412792496,
+      0.0008529784223507699,
+      0.20779781561055513,
+      -0.028528261011815676,
+      0.018657865903377445,
+      -0.008084909803351633,
+      -0.029069997595995014,
+      0.017349441529002342,
+      -0.01184739386483979,
+      0.028884178197098292,
+      -0.020163419771572464,
+      0,
+      0.09858256073336939,
+      0.17363026324755215,
+      -0.2475673695043847,
+      -0.031993290615012604,
+      0.006023892474802307,
+      -0.016854189701616333,
+      -0.004753967944368469,
+      0,
+      0.03869332941727651,
+      0.051924829344644347,
+      0.014229070490544839,
+      -0.12777933056212387,
+      0,
+      0.16248639890103683,
+      -0.0069763272738970076,
+      -0.15940676438822757,
+      0,
+      -0.019035408548570474,
+      0
+    ],
+    "intercept": 0.7400078717249922,
+    "featureImportances": {
+      "amount": 0.0179,
+      "customer_age_days": 0.0318,
+      "previous_transactions": 0.0287,
+      "successful_transactions": 0.033,
+      "failed_transactions": 0.0227,
+      "previous_recovery_count": 0.0404,
+      "retry_count": 0.0679,
+      "time_since_failure": 0.0565,
+      "days_since_last_payment": 0.0201,
+      "historical_success_rate": 0.0376,
+      "is_weekend": 0.0088,
+      "hour_of_day": 0.0328,
+      "payment_method_CARD_CREDIT": 0.0085,
+      "payment_method_CARD_DEBIT": 0.0048,
+      "payment_method_UPI": 0.0087,
+      "payment_method_NETBANKING": 0.0033,
+      "payment_method_AUTO_DEBIT": 0.0085,
+      "payment_method_WALLET": 0.0071,
+      "payment_method_OTHER": 0,
+      "failure_reason_Insufficient Funds": 0.034,
+      "failure_reason_Network Failure": 0.0524,
+      "failure_reason_Bank Decline": 0.223,
+      "failure_reason_Expired Payment Method": 0.0077,
+      "failure_reason_Authentication Failure": 0.0046,
+      "failure_reason_Daily Limit Exceeded": 0.0051,
+      "failure_reason_Customer Dropout": 0.0117,
+      "failure_reason_Other": 0,
+      "customer_segment_ENTERPRISE": 0.0116,
+      "customer_segment_PRO": 0.0083,
+      "customer_segment_GROWTH": 0.0074,
+      "customer_segment_STARTER": 0.0094,
+      "customer_segment_UNKNOWN": 0,
+      "subscription_status_ACTIVE": 0.0481,
+      "subscription_status_PAST_DUE": 0.0088,
+      "subscription_status_UNPAID": 0.1247,
+      "subscription_status_CANCELLED": 0,
+      "subscription_status_NONE": 0.004,
+      "subscription_status_UNKNOWN": 0
+    },
+    "hyperparameters": {
+      "numTrees": 28,
+      "maxDepth": 4,
+      "learningRate": 0.1,
+      "minSamplesSplit": 10
+    }
+  }
+}

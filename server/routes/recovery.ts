@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { memoryStore } from '../db/connection.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { MLRecoveryPredictor } from '../../ml/inference/predictor.js';
 
 export const recoveryRouter = Router();
 
@@ -344,4 +345,63 @@ recoveryRouter.post('/cases/:id/stop', (req: Request, res: Response, next: NextF
     }
   });
 });
+
+recoveryRouter.post('/batch-diagnose', (req: Request, res: Response) => {
+  try {
+    const predictor = MLRecoveryPredictor.getInstance();
+
+    const allPayments = Array.from(memoryStore.payments.values());
+    const failedPayments = allPayments.filter(
+      (p) => p.payment_status === 'FAILED' || p.payment_status === 'ABANDONED' || p.recovery_status === 'AT_RISK' || p.recovery_status === 'RECOVERING'
+    );
+
+    let updatedCount = 0;
+    const batchInput = failedPayments.slice(0, 100).map((p) => ({
+      transaction_id: p.transaction_id,
+      amount: p.amount,
+      payment_method: p.payment_method,
+      failure_reason: p.failure_reason || p.failure_category || 'Network Failure',
+      retry_count: p.retry_count ?? 0,
+      customer_age_days: p.customer_age_days ?? 45,
+      previous_transactions: (p.previous_successful_payments ?? 3) + (p.previous_failed_payments ?? 1),
+      successful_transactions: p.previous_successful_payments ?? 3,
+      failed_transactions: p.previous_failed_payments ?? 1
+    }));
+
+    const batchSummary = predictor.batchPredict(batchInput);
+
+    // Synchronize recovery cases with new ML predictions
+    for (const pred of batchSummary.predictions) {
+      const existingCase = Array.from(memoryStore.recoveryCases.values()).find(
+        (c) => c.transaction_id === pred.transaction_id || c.payment_id === pred.transaction_id
+      );
+
+      if (existingCase) {
+        existingCase.ml_recovery_probability = pred.recovery_probability;
+        existingCase.recovery_probability = pred.recovery_probability;
+        existingCase.risk_level = pred.risk_level === 'CRITICAL' ? 'HIGH' : pred.risk_level;
+        existingCase.primary_failure_diagnosis = pred.root_cause;
+        existingCase.recommended_strategy = pred.recommended_action;
+        existingCase.at_risk_amount = pred.revenue_at_risk;
+        updatedCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Batch diagnostic completed across ${batchSummary.total_transactions} transactions.`,
+      data: {
+        analyzed_count: batchSummary.total_transactions,
+        updated_cases_count: updatedCount,
+        batch_summary: batchSummary
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: 'BATCH_DIAGNOSE_ERROR', message: error.message }
+    });
+  }
+});
+
 

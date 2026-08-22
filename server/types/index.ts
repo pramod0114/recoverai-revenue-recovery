@@ -125,6 +125,24 @@ export interface RecoveryActionRecord {
   created_at: string;
 }
 
+export interface MlPredictionRecord {
+  id: string;
+  transaction_id: string;
+  risk_score: number;
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  recovery_probability: number;
+  recovery_level: 'HIGH' | 'MEDIUM' | 'LOW';
+  revenue_at_risk: number;
+  expected_recovery: number;
+  root_cause: string;
+  root_cause_confidence?: number;
+  recommended_action: string;
+  action_reason?: string;
+  explanation?: any[];
+  model_version: string;
+  created_at: string;
+}
+
 export interface AuditLogRecord {
   id: string;
   actor_type: 'SYSTEM_AI_AGENT' | 'ADMIN_USER' | 'ANALYST_USER' | 'WEBHOOK_EVENT';

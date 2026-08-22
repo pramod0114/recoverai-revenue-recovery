@@ -11,6 +11,7 @@ import { dashboardRouter } from './server/routes/dashboard.js';
 import { paymentsRouter } from './server/routes/payments.js';
 import { customersRouter } from './server/routes/customers.js';
 import { recoveryRouter } from './server/routes/recovery.js';
+import { mlRouter } from './server/routes/ml.js';
 import { auditRouter } from './server/routes/audit.js';
 
 dotenv.config();
@@ -34,6 +35,7 @@ async function startServer() {
   app.use('/api/payments', paymentsRouter);
   app.use('/api/customers', customersRouter);
   app.use('/api/recovery', recoveryRouter);
+  app.use('/api/ml', mlRouter);
   app.use('/api/audit', auditRouter);
 
   // Centralized Error Handling Middleware for APIs

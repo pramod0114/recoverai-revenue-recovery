@@ -103,6 +103,25 @@ export const api = {
   },
   batchDiagnose: () => request<any>('/recovery/batch-diagnose', { method: 'POST' }),
 
+  // ML Prediction Engine
+  predictMl: (payload: { transaction_id?: string; amount?: number; payment_method?: string; failure_reason?: string; [key: string]: any }) =>
+    request<any>('/ml/predict', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  batchPredictMl: (payload?: { transactions?: any[]; transaction_ids?: string[]; analyze_all_open?: boolean }) =>
+    request<any>('/ml/batch-predict', {
+      method: 'POST',
+      body: JSON.stringify(payload || {})
+    }),
+  getMlMetrics: () => request<any>('/ml/metrics'),
+  getMlModelInfo: () => request<any>('/ml/model-info'),
+  retrainMlModel: (params?: { count?: number; seed?: number }) =>
+    request<any>('/ml/retrain', {
+      method: 'POST',
+      body: JSON.stringify(params || {})
+    }),
+
   // Audit
   getAuditLogs: (params?: Record<string, string | number>) => {
     const query = params ? '?' + new URLSearchParams(params as any).toString() : '';

@@ -30,6 +30,7 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
   onUpdated
 }) => {
   const [caseData, setCaseData] = useState<any>(null);
+  const [mlPrediction, setMlPrediction] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -44,6 +45,21 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
       setLoading(true);
       const res = await api.getRecoveryCaseById(caseId!);
       setCaseData(res.data);
+
+      // Fetch live explainable ML prediction
+      try {
+        const mlRes = await api.predictMl({
+          transaction_id: res.data?.transaction_id || res.data?.id,
+          amount: res.data?.at_risk_amount,
+          payment_method: res.data?.payment?.payment_method || res.data?.payment_method || 'UPI',
+          failure_reason: res.data?.primary_failure_diagnosis || res.data?.payment?.failure_reason || 'Network Failure'
+        });
+        if (mlRes.data) {
+          setMlPrediction(mlRes.data);
+        }
+      } catch (mlErr) {
+        console.warn('ML live prediction error:', mlErr);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -241,36 +257,68 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-semibold px-2.5 py-1 bg-white text-[#2563EB] border border-[#BFDBFE] rounded-lg shadow-2xs">
-                      Model v1.0.4 Active
+                      {mlPrediction?.model_version || 'recovery-model-v1'} Active
                     </span>
                   </div>
                 </div>
 
                 {/* Evidence & Why Explanation */}
                 <div className="bg-white p-4 rounded-xl border border-[#EAECF0] space-y-2.5">
-                  <div className="text-xs font-semibold text-[#344054] flex items-center gap-1.5">
+                  <div className="text-xs font-semibold text-[#344054] flex items-center justify-between">
                     <span>WHY THIS STRATEGY? (EXPLAINABLE AI DIAGNOSTIC)</span>
+                    {mlPrediction?.root_cause_confidence && (
+                      <span className="text-[11px] text-[#2563EB] font-normal">
+                        Confidence: {(mlPrediction.root_cause_confidence * 100).toFixed(0)}%
+                      </span>
+                    )}
                   </div>
-                  <ul className="space-y-1.5 text-xs text-[#475467]">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
-                      <span>
-                        Customer has <strong>{caseData?.payment_history_success_count || 8}</strong> prior successful transactions on this gateway.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
-                      <span>
-                        Diagnosis: <strong>{caseData?.primary_failure_diagnosis || 'Temporary bank network timeout (GATEWAY_TIMEOUT)'}</strong>.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
-                      <span>
-                        Optimal retry window calculated: <strong>Off-peak banking window (+35 mins)</strong> with 84% simulated success rate.
-                      </span>
-                    </li>
-                  </ul>
+                  {mlPrediction?.explanation && mlPrediction.explanation.length > 0 ? (
+                    <ul className="space-y-2 text-xs text-[#475467]">
+                      {mlPrediction.explanation.map((exp: any, idx: number) => (
+                        <li key={idx} className="flex items-start justify-between gap-2 p-1.5 rounded-lg bg-[#F9FAFB]">
+                          <div className="flex items-start gap-2">
+                            <span
+                              className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 ${
+                                exp.direction === '+' ? 'bg-[#ECFDF3] text-[#16A34A]' : 'bg-[#FEF2F2] text-[#DC2626]'
+                              }`}
+                            >
+                              {exp.direction}
+                            </span>
+                            <span>{exp.description}</span>
+                          </div>
+                          <span className="text-[10px] font-semibold text-[#667085] shrink-0">
+                            Impact: {(exp.impact * 100).toFixed(0)}%
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="space-y-1.5 text-xs text-[#475467]">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                        <span>
+                          Customer has <strong>{caseData?.payment_history_success_count || 8}</strong> prior successful transactions on this gateway.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                        <span>
+                          Diagnosis: <strong>{caseData?.primary_failure_diagnosis || 'Temporary bank network timeout (GATEWAY_TIMEOUT)'}</strong>.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                        <span>
+                          Optimal retry window calculated: <strong>Off-peak banking window (+35 mins)</strong> with 84% simulated success rate.
+                        </span>
+                      </li>
+                    </ul>
+                  )}
+                  {mlPrediction?.action_reason && (
+                    <div className="text-[11px] text-[#667085] pt-1 border-t border-[#EAECF0]">
+                      <strong>Decision Rule:</strong> {mlPrediction.action_reason}
+                    </div>
+                  )}
                 </div>
 
                 {/* Root Cause & Policy Info */}
@@ -278,13 +326,13 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                   <div className="p-3 bg-white rounded-lg border border-[#EAECF0]">
                     <span className="text-[#667085] block text-[11px]">Primary Root Cause</span>
                     <span className="font-semibold text-[#171717]">
-                      {caseData?.primary_failure_diagnosis || 'Temporary liquidity/gateway glitch'}
+                      {mlPrediction?.root_cause || caseData?.primary_failure_diagnosis || 'Temporary liquidity/gateway glitch'}
                     </span>
                   </div>
                   <div className="p-3 bg-white rounded-lg border border-[#EAECF0]">
                     <span className="text-[#667085] block text-[11px]">Safety Bounds & Policy</span>
                     <span className="font-semibold text-[#16A34A]">
-                      Retry bounded (Max 3 attempts, 0 user fatigue)
+                      Retry bounded (Max 2 attempts, 0 user fatigue)
                     </span>
                   </div>
                 </div>

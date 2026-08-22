@@ -9,6 +9,7 @@ import {
   PaymentRecord,
   RecoveryCaseRecord,
   RecoveryActionRecord,
+  MlPredictionRecord,
   AuditLogRecord
 } from '../types/index.js';
 
@@ -23,6 +24,7 @@ export const memoryStore = {
   payments: new Map<string, PaymentRecord>(),
   recoveryCases: new Map<string, RecoveryCaseRecord>(),
   recoveryActions: new Map<string, RecoveryActionRecord>(),
+  mlPredictions: new Map<string, MlPredictionRecord>(),
   auditLogs: [] as AuditLogRecord[]
 };
 
