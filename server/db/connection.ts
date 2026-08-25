@@ -36,6 +36,9 @@ const pool = mysql.createPool({
   },
 });
 
+/**
+ * Initialize and test database connection
+ */
 export async function initDatabase(): Promise<void> {
   let connection: mysql.PoolConnection | undefined;
 
@@ -53,10 +56,16 @@ export async function initDatabase(): Promise<void> {
   }
 }
 
+/**
+ * Get a database connection from the pool
+ */
 export async function getConnection(): Promise<mysql.PoolConnection> {
   return pool.getConnection();
 }
 
+/**
+ * Execute a database query
+ */
 export async function query<T = any>(
   sql: string,
   values?: any[]
@@ -64,10 +73,45 @@ export async function query<T = any>(
   return pool.query<T[]>(sql, values);
 }
 
-export default pool;
+/**
+ * Check database connection status
+ */
+export async function getDbStatus(): Promise<{
+  connected: boolean;
+  message: string;
+}> {
+  try {
+    const connection = await pool.getConnection();
+
+    try {
+      await connection.query('SELECT 1');
+
+      return {
+        connected: true,
+        message: 'Database connected successfully',
+      };
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error('[DB] Status check failed:', error);
+
+    return {
+      connected: false,
+      message: 'Database connection failed',
+    };
+  }
+}
+
+/**
+ * Temporary compatibility store.
+ * Used by existing routes that still reference memoryStore.
+ */
 export const memoryStore = {
   payments: new Map<string, any>(),
   customers: new Map<string, any>(),
   recoveryCases: new Map<string, any>(),
   auditLogs: [] as any[],
 };
+
+export default pool;
