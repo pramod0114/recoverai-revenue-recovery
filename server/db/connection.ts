@@ -65,3 +65,9 @@ export async function query<T = any>(
 }
 
 export default pool;
+export const memoryStore = {
+  payments: new Map<string, any>(),
+  customers: new Map<string, any>(),
+  recoveryCases: new Map<string, any>(),
+  auditLogs: [] as any[],
+};
