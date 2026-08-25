@@ -9,13 +9,19 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL is not configured');
 }
 
+const dbUrl = new URL(databaseUrl);
+
 const connectionLimit = Math.min(
   Math.max(Number(process.env.DB_CONNECTION_LIMIT || 3), 1),
   5
 );
 
 const pool = mysql.createPool({
-  uri: databaseUrl,
+  host: dbUrl.hostname,
+  port: Number(dbUrl.port || 4000),
+  user: decodeURIComponent(dbUrl.username),
+  password: decodeURIComponent(dbUrl.password),
+  database: dbUrl.pathname.replace(/^\//, ''),
 
   waitForConnections: true,
   connectionLimit,
