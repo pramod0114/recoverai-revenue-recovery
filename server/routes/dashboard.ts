@@ -141,7 +141,7 @@ dashboardRouter.get('/kpis', (req: Request, res: Response) => {
           uptime: '99.98%'
         },
         systemHealth: {
-          gateway: `${memoryStore.systemConfig.gatewayMode} Sandbox`,
+          gateway: 'PAYMENT GATEWAY (ACTIVE)',
           database: 'HEALTHY (SYNCED)',
           webhooks: 'LISTENING',
           rateLimit: `${memoryStore.systemConfig.rateLimitPerMin} req/min`

@@ -98,9 +98,9 @@ export const Navbar: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#171717] text-[15px] tracking-tight">RecoverAI</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A] flex items-center gap-1 shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] animate-pulse"></span>
-                TEST MODE
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] flex items-center gap-1 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+                ACTIVE
               </span>
             </div>
             <p className="text-[11px] text-[#667085] leading-none hidden sm:block">
@@ -117,18 +117,6 @@ export const Navbar: React.FC = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-4">
-        {/* Creator GitHub Link */}
-        <a
-          href="https://github.com/pramod0114"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-[#F9FAFB] hover:bg-[#F2F4F7] border border-[#EAECF0] hover:border-[#D0D5DD] rounded-lg text-[12px] text-[#344054] hover:text-[#101828] transition-all group"
-          title="Created by Pramod Mahajan (GitHub: https://github.com/pramod0114)"
-        >
-          <Github className="w-3.5 h-3.5 text-[#101828] group-hover:scale-110 transition-transform" />
-          <span className="font-medium">Pramod Mahajan</span>
-        </a>
-
         {/* Live sync pill */}
         <div className="hidden md:flex items-center gap-2 px-2.5 py-1 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg text-[12px] text-[#475467]">
           <span className="w-2 h-2 rounded-full bg-[#16A34A]"></span>

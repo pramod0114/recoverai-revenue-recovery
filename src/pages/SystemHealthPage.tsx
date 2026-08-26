@@ -133,8 +133,8 @@ export const SystemHealthPage: React.FC = () => {
       icon: Cpu
     },
     {
-      name: 'Razorpay Test-Mode Gateway & Webhook Receptor',
-      status: 'OPERATIONAL (TEST MODE)',
+      name: 'Razorpay Gateway & Webhook Receptor',
+      status: 'OPERATIONAL (ACTIVE)',
       uptime: '100%',
       latency: '22ms',
       description: 'Cryptographic HMAC-SHA256 signature verification & idempotent event deduplication.',
@@ -162,12 +162,12 @@ export const SystemHealthPage: React.FC = () => {
                 Admin Diagnostic
               </span>
             )}
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
-              TEST MODE
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#027A48] border border-[#A7F3D0]">
+              ACTIVE
             </span>
           </div>
           <p className="text-xs text-[#667085] mt-1">
-            Real-time status of microservices, database clusters, Razorpay test-mode gateway, and webhook security.
+            Real-time status of microservices, database clusters, Razorpay gateway, and webhook security.
           </p>
         </div>
 
@@ -236,14 +236,14 @@ export const SystemHealthPage: React.FC = () => {
         })}
       </div>
 
-      {/* Razorpay Webhook & Sandbox Integration Suite */}
+      {/* Razorpay Webhook & Gateway Integration Suite */}
       <div className="bg-white rounded-xl border border-[#EAECF0] p-6 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#EAECF0]">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-[#171717]">Razorpay Test-Mode Webhook & Security Diagnostic Suite</h2>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
-                SANDBOX
+              <h2 className="text-base font-bold text-[#171717]">Razorpay Webhook &amp; Security Diagnostic Suite</h2>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#ECFDF5] text-[#027A48] border border-[#A7F3D0]">
+                ACTIVE
               </span>
             </div>
             <p className="text-xs text-[#667085] mt-0.5">

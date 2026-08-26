@@ -194,7 +194,7 @@ export const AiActivityPage: React.FC = () => {
           }`}
         >
           <Sliders className="w-4 h-4" />
-          Interactive ML Inference Sandbox
+          Interactive ML Inference Simulator
         </button>
 
         <button

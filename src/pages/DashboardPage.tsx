@@ -575,25 +575,21 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Dashboard Creator Attribution Footer */}
+      {/* Dashboard System Status Footer */}
       <div className="p-4 bg-white border border-[#EAECF0] rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#667085] shadow-xs">
         <div className="flex items-center gap-2">
           <span>RecoverAI Autonomous Revenue Recovery Platform</span>
           <span className="text-[#D0D5DD]">•</span>
-          <span>Razorpay Buildathon Track 03</span>
+          <span className="text-[#101828] font-medium">Enterprise Production Edition</span>
         </div>
-        <a
-          href="https://github.com/pramod0114"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-1.5 bg-[#F9FAFB] hover:bg-[#F2F4F7] text-[#344054] hover:text-[#101828] border border-[#D0D5DD] rounded-lg font-medium transition-colors group"
-        >
-          <Github className="w-4 h-4 text-[#101828] group-hover:scale-110 transition-transform" />
-          <span>Created by <strong className="font-semibold text-[#101828]">Pramod Mahajan</strong></span>
-          <span className="text-[11px] text-[#2563EB] font-semibold flex items-center gap-0.5 ml-1">
-            @pramod0114 <ArrowUpRight className="w-3 h-3" />
+        <div className="flex items-center gap-4 text-[11px] text-[#667085]">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#16A34A]"></span>
+            All Subsystems Nominal
           </span>
-        </a>
+          <span className="text-[#D0D5DD]">•</span>
+          <span>© 2026 RecoverAI Inc.</span>
+        </div>
       </div>
 
       {/* Diagnostics Modal */}

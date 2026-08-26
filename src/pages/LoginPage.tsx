@@ -50,7 +50,7 @@ export const LoginPage: React.FC = () => {
             RecoverAI Agent Console
           </h1>
           <p className="text-xs text-[#667085]">
-            Razorpay Buildathon Track 03 • AI Revenue Recovery Agent
+            Autonomous Payment Recovery & Revenue Optimization Platform
           </p>
         </div>
 
@@ -109,33 +109,42 @@ export const LoginPage: React.FC = () => {
 
           {/* Quick 1-Click Access for Evaluation */}
           <div className="pt-4 border-t border-[#EAECF0] space-y-2.5">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-[#98A2B3] text-center">
-              Quick Role Test Logins
+            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-[#98A2B3]">
+              <span>Quick Test Access</span>
+              <span className="text-[10px] lowercase font-mono bg-[#F2F4F7] px-1.5 py-0.5 rounded text-[#667085]">pass: admin123</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickLogin('ADMIN')}
+                onClick={() => {
+                  setEmail('admin@recoverai.io');
+                  setPassword('admin123');
+                  handleQuickLogin('ADMIN');
+                }}
                 className="p-2.5 rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-[#DBEAFE] text-left transition-colors"
               >
-                <div className="font-semibold text-xs text-[#1D4ED8]">Admin Role</div>
-                <div className="text-[10px] text-[#2563EB]">Full Autonomous Control</div>
+                <div className="font-semibold text-xs text-[#1D4ED8]">Admin Demo</div>
+                <div className="text-[10px] text-[#2563EB]">admin@recoverai.io</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickLogin('ANALYST')}
+                onClick={() => {
+                  setEmail('analyst@recoverai.io');
+                  setPassword('analyst123');
+                  handleQuickLogin('ANALYST');
+                }}
                 className="p-2.5 rounded-lg border border-[#EAECF0] bg-[#F9FAFB] hover:bg-[#F2F4F7] text-left transition-colors"
               >
-                <div className="font-semibold text-xs text-[#344054]">Analyst Role</div>
-                <div className="text-[10px] text-[#667085]">Audit & Review Access</div>
+                <div className="font-semibold text-xs text-[#344054]">Analyst Demo</div>
+                <div className="text-[10px] text-[#667085]">analyst@recoverai.io</div>
               </button>
             </div>
           </div>
         </div>
 
         <div className="text-center text-xs text-[#98A2B3]">
-          RecoverAI Production Foundation • Razorpay Track 03
+          RecoverAI Enterprise Platform • Production Grade Protection
         </div>
       </div>
     </div>

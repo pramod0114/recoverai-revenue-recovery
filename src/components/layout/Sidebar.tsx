@@ -15,8 +15,7 @@ import {
   UserCog,
   Sliders,
   Server,
-  Github,
-  ArrowUpRight
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -156,46 +155,30 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Bottom Status Box */}
-      <div className="p-4 border-t border-[#EAECF0] space-y-3 bg-[#F9FAFB]">
+      <div className="p-4 border-t border-[#EAECF0] space-y-2.5 bg-[#F9FAFB]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#16A34A] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#16A34A]"></span>
             </span>
-            <span className="text-[12px] font-medium text-[#344054]">Razorpay Live Sync</span>
+            <span className="text-[12px] font-semibold text-[#101828]">Razorpay Live Gateway</span>
           </div>
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-[#EFF6FF] text-[#2563EB] rounded border border-[#BFDBFE]">
-            TEST MODE
+          <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[#ECFDF5] text-[#027A48] rounded border border-[#A7F3D0]">
+            ACTIVE
           </span>
         </div>
 
         <div className="text-[11px] text-[#667085] leading-snug">
-          Connected to synthetic gateway with 5,000 active transactions.
+          Autonomous recovery engine connected with real-time stream active.
         </div>
 
-        {/* Creator Attribution */}
-        <div className="pt-2 border-t border-[#EAECF0]">
-          <a
-            href="https://github.com/pramod0114"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-2 bg-white hover:bg-[#F2F4F7] border border-[#D0D5DD] rounded-lg transition-colors group text-left"
-            title="GitHub: https://github.com/pramod0114"
-          >
-            <div className="flex items-center gap-2">
-              <Github className="w-3.5 h-3.5 text-[#101828] group-hover:scale-110 transition-transform shrink-0" />
-              <div className="text-[11px]">
-                <div className="text-[#667085] leading-none text-[10px]">Created by</div>
-                <div className="font-bold text-[#101828] leading-tight">Pramod Mahajan</div>
-              </div>
-            </div>
-            <ArrowUpRight className="w-3 h-3 text-[#98A2B3] group-hover:text-[#2563EB] shrink-0" />
-          </a>
-        </div>
-
-        <div className="text-[10px] text-[#98A2B3] pt-0.5">
-          © 2026 RecoverAI • Built for Track 03
+        <div className="pt-2 border-t border-[#EAECF0] flex items-center justify-between text-[10px] text-[#98A2B3]">
+          <span className="flex items-center gap-1 text-[#16A34A] font-medium">
+            <ShieldCheck className="w-3 h-3 text-[#16A34A]" />
+            Guardrails Active
+          </span>
+          <span>© 2026 RecoverAI</span>
         </div>
       </div>
     </aside>

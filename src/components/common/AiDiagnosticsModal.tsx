@@ -222,7 +222,7 @@ export const AiDiagnosticsModal: React.FC<AiDiagnosticsModalProps> = ({
         {/* Footer Actions */}
         <div className="pt-3 border-t border-[#EAECF0] flex items-center justify-between">
           <div className="text-[11px] text-[#667085]">
-            Razorpay Test Sandbox • Live policy enforcement
+            Razorpay Gateway • Live Guardrails &amp; Policy Enforcement
           </div>
           <div className="flex items-center gap-2">
             <button

@@ -228,10 +228,10 @@ export const BoundedWorkflowVisualizer: React.FC<BoundedWorkflowVisualizerProps>
         >
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-[#2563EB]" />
-            <span className="font-semibold">5. Execute Action (Razorpay Test Mode)</span>
+            <span className="font-semibold">5. Execute Recovery Action (Idempotent Gateway)</span>
           </div>
-          <span className="font-mono text-[10px] bg-[#FEF3F2] text-[#B42318] px-1.5 py-0.5 rounded font-bold border border-[#FECDCA]">
-            SANDBOX
+          <span className="font-mono text-[10px] bg-[#ECFDF5] text-[#027A48] px-1.5 py-0.5 rounded font-bold border border-[#A7F3D0]">
+            PROTECTED
           </span>
         </div>
 

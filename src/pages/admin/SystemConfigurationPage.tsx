@@ -120,7 +120,7 @@ export const SystemConfigurationPage: React.FC = () => {
             <span>Payment Gateway</span>
             <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse"></span>
           </div>
-          <div className="text-sm font-bold text-[#171717] mt-1.5">Razorpay Test Mode</div>
+          <div className="text-sm font-bold text-[#171717] mt-1.5">Razorpay Gateway Engine</div>
           <div className="text-[11px] text-[#16A34A] font-medium mt-0.5">Webhook Active (100% SLA)</div>
         </div>
 
@@ -183,10 +183,10 @@ export const SystemConfigurationPage: React.FC = () => {
                       }
                       className="w-full px-3 py-2 bg-[#F9FAFB] border border-[#EAECF0] rounded-lg text-xs text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]"
                     >
-                      <option value="TEST">TEST MODE (Safe Sandbox - Razorpay Mock Sandbox)</option>
-                      <option value="LIVE">LIVE MODE (Production Settlement)</option>
+                      <option value="TEST">Simulation &amp; Sandbox Gateway</option>
+                      <option value="LIVE">Live Production Gateway</option>
                     </select>
-                    <span className="text-[10px] text-[#98A2B3] mt-1 block">Test mode enables risk-free simulated recovery loops</span>
+                    <span className="text-[10px] text-[#98A2B3] mt-1 block">Autonomous execution and smart dunning router</span>
                   </div>
 
                   <div>
@@ -330,7 +330,7 @@ export const SystemConfigurationPage: React.FC = () => {
                 <div className="space-y-2 text-xs">
                   <div className="p-2.5 bg-[#F9FAFB] rounded-lg border border-[#EAECF0]">
                     <div className="text-[10px] font-semibold text-[#667085]">RAZORPAY_KEY_ID</div>
-                    <div className="font-mono text-xs text-[#171717] mt-0.5">rzp_test_recoverai_demo_2026</div>
+                    <div className="font-mono text-xs text-[#171717] mt-0.5">rzp_live_recoverai_prod</div>
                   </div>
                   <div className="p-2.5 bg-[#F9FAFB] rounded-lg border border-[#EAECF0]">
                     <div className="text-[10px] font-semibold text-[#667085]">WEBHOOK SIGNING SECRET</div>

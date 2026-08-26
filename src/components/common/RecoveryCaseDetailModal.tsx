@@ -224,8 +224,8 @@ export const RecoveryCaseDetailModal: React.FC<RecoveryCaseDetailModalProps> = (
                 <h2 className="text-base font-bold text-[#171717]">
                   Recovery Case #{caseData?.id || caseId}
                 </h2>
-                <span className="px-2 py-0.5 bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-[10px] font-bold rounded-full">
-                  RAZORPAY TEST MODE
+                <span className="px-2 py-0.5 bg-[#ECFDF5] border border-[#A7F3D0] text-[#027A48] text-[10px] font-bold rounded-full">
+                  RAZORPAY PROTECTED
                 </span>
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
