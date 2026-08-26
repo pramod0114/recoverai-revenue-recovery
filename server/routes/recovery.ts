@@ -517,6 +517,68 @@ recoveryRouter.post('/cases/:id/action', async (req: Request, res: Response, nex
   }
 });
 
+recoveryRouter.post('/cases/:id/approve', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rCase = memoryStore.recoveryCases.get(req.params.id);
+    if (!rCase) {
+      return next(new AppError('Recovery case not found', 404, 'NOT_FOUND'));
+    }
+    const result = await agent.execute({
+      case_id: req.params.id,
+      override_action: (rCase.recommended_strategy as ControlledRecoveryAction) || 'RETRY_PAYMENT'
+    });
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+recoveryRouter.post('/cases/:id/stop', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rCase = memoryStore.recoveryCases.get(req.params.id);
+    if (!rCase) {
+      return next(new AppError('Recovery case not found', 404, 'NOT_FOUND'));
+    }
+    rCase.status = 'DISMISSED';
+    (rCase as any).workflow_state = 'DISMISSED';
+    rCase.updated_at = new Date().toISOString();
+    res.json({
+      success: true,
+      message: 'Recovery case stopped and dismissed.',
+      data: rCase
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
+recoveryRouter.post('/batch-diagnose', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cases = Array.from(memoryStore.recoveryCases.values()).slice(0, 50);
+    let analyzed = 0;
+    for (const c of cases) {
+      await agent.analyze({
+        case_id: c.id,
+        transaction_id: c.transaction_id || c.id,
+        amount: c.at_risk_amount,
+        payment_method: c.payment_method || 'UPI',
+        failure_reason: c.primary_failure_diagnosis || 'Network Error',
+        retry_count: c.actions_taken_count || 0
+      });
+      analyzed++;
+    }
+    res.json({
+      success: true,
+      data: { analyzed_count: analyzed }
+    });
+  } catch (err: any) {
+    next(err);
+  }
+});
+
 recoveryRouter.post('/cases/:id/escalate', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await agent.escalate({
