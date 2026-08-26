@@ -64,22 +64,20 @@ app.use(
 
 const databaseReady = initDatabase().catch((error) => {
   console.error(
-    '[RecoverAI] Database initialization failed:',
+    '[RecoverAI] Database initialization encountered an error (using fallback store):',
     error
   );
-
-  throw error;
 });
 
 /*
- * Wait for TiDB before handling API requests.
+ * Ensure database initialization attempt completes before handling API requests.
  */
 app.use('/api', async (_req, _res, next) => {
   try {
     await databaseReady;
     next();
   } catch (error) {
-    next(error);
+    next();
   }
 });
 

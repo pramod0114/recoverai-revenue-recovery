@@ -58,11 +58,17 @@ let pool: mysql.Pool | null = null;
 let isMySqlConnected = false;
 
 const databaseUrl = process.env.DATABASE_URL;
+const dbHost = process.env.DB_HOST;
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASSWORD || '';
+const dbName = process.env.DB_NAME || process.env.DB_DATABASE || 'recoverai_db';
+const dbPort = Number(process.env.DB_PORT || 4000);
+
 if (databaseUrl) {
   try {
     const dbUrl = new URL(databaseUrl);
     const connectionLimit = Math.min(
-      Math.max(Number(process.env.DB_CONNECTION_LIMIT || 3), 1),
+      Math.max(Number(process.env.DB_CONNECTION_LIMIT || 2), 1),
       5
     );
 
@@ -71,19 +77,49 @@ if (databaseUrl) {
       port: Number(dbUrl.port || 4000),
       user: decodeURIComponent(dbUrl.username),
       password: decodeURIComponent(dbUrl.password),
-      database: dbUrl.pathname.replace(/^\//, ''),
+      database: dbUrl.pathname.replace(/^\//, '') || 'recoverai_db',
       waitForConnections: true,
       connectionLimit,
       maxIdle: connectionLimit,
-      idleTimeout: 60000,
+      idleTimeout: 30000,
       enableKeepAlive: true,
       keepAliveInitialDelay: 10000,
       ssl: {
+        minVersion: 'TLSv1.2',
         rejectUnauthorized: true,
       },
     });
   } catch (err) {
     console.warn('[DB] Could not construct MySQL pool from DATABASE_URL:', err);
+    pool = null;
+  }
+} else if (dbHost && dbUser) {
+  try {
+    const connectionLimit = Math.min(
+      Math.max(Number(process.env.DB_CONNECTION_LIMIT || 2), 1),
+      5
+    );
+
+    pool = mysql.createPool({
+      host: dbHost,
+      port: dbPort,
+      user: dbUser,
+      password: dbPassword,
+      database: dbName,
+      waitForConnections: true,
+      connectionLimit,
+      maxIdle: connectionLimit,
+      idleTimeout: 30000,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10000,
+      ssl: process.env.DB_SSL === 'false' ? undefined : {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true,
+      },
+    });
+    console.log(`[DB] Created MySQL/TiDB pool for host: ${dbHost}:${dbPort}, database: ${dbName}`);
+  } catch (err) {
+    console.warn('[DB] Could not construct MySQL pool from DB_* parameters:', err);
     pool = null;
   }
 }
