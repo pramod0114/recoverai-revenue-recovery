@@ -281,6 +281,50 @@ async function seedMemoryStore(): Promise<void> {
         created_at: record.created_at,
         updated_at: record.created_at
       });
+
+      // Create realistic intervention telemetry for cases that were acted upon
+      if (isRecovered || isRecovering || (index % 3 === 0)) {
+        const actionId = `act_${100000 + index}`;
+        const channelType = record.payment_method === 'UPI'
+          ? (index % 2 === 0 ? 'WHATSAPP' : 'SMS')
+          : (index % 4 === 0 ? 'HUMAN_SUPPORT' : 'GATEWAY_AUTO');
+
+        const interventionType = record.recommended_strategy || (
+          channelType === 'WHATSAPP'
+            ? 'SEND_PAYMENT_REMINDER'
+            : channelType === 'SMS'
+            ? 'TRIGGER_PAYMENT_LINK'
+            : channelType === 'HUMAN_SUPPORT'
+            ? 'ESCALATE_TO_ANALYST'
+            : 'SMART_RETRY'
+        );
+
+        const actionStatus = isRecovered ? 'SUCCESS' : isRecovering ? 'EXECUTED' : 'PENDING_REVIEW';
+        const telemetryMsg = isRecovered
+          ? `Payment authorization succeeded via ${channelType}. ₹${record.amount.toLocaleString('en-IN')} recovered.`
+          : isRecovering
+          ? `Dispatch confirmed across ${channelType}. Dynamic payment link delivered to customer.`
+          : `AI Model flagged case for bounded execution (${(record.ml_recovery_probability * 100).toFixed(1)}% recovery probability).`;
+
+        memoryStore.recoveryActions.set(actionId, {
+          id: actionId,
+          case_id: caseId,
+          action_type: interventionType,
+          status: actionStatus,
+          trigger_channel: channelType,
+          payload_snapshot: {
+            amount: record.amount,
+            currency: record.currency,
+            customer_email: record.customer_email,
+            customer_phone: record.customer_phone,
+            method: record.payment_method
+          },
+          result_response: telemetryMsg,
+          scheduled_for: record.created_at,
+          executed_at: record.created_at,
+          created_at: record.created_at
+        });
+      }
     }
   });
 
